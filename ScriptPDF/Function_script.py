@@ -34,21 +34,21 @@ def detect_type_of_file(string):
     #Comprobamos que los archivos contengan el Partner Name, ya que existen de Clovis, de Pfizer y de Roche
     type_of_file=""
     if 'Partner Name' in string or 'PARTNER NAME' in string: 
-    lines = list(filter(None,string.split('\n'))) 
-    for i in range(len(lines)): #Comprobamos de que tipo de Partner es. 
-        if 'Partner Name' in lines[i] or 'PARTNER NAME' in lines[i]:
-            print(lines[i] + 'Nombre del archivo: '+ pdf )
-            if 'Pfizer Inc' in lines[i]:
-                type_of_file='Pfizer Inc'
-                return type_of_file
-            elif 'Clovis Oncology' in lines[i] or 'CLOVIS ONCOLOGY' in lines[i]:
-                type_of_file='Clovis Oncology'
-                return type_of_file
-            elif 'Roche Pharma' in lines[i]:
-                type_of_file='Roche Pharma'
-                return type_of_file
-            else:
-                print("Hay un archivo que no cumple este formato "+ pdf)
+        lines = list(filter(None,string.split('\n'))) 
+        for i in range(len(lines)): #Comprobamos de que tipo de Partner es. 
+            if 'Partner Name' in lines[i] or 'PARTNER NAME' in lines[i]:
+                print(lines[i] + 'Nombre del archivo: '+ pdf )
+                if 'Pfizer Inc' in lines[i]:
+                    type_of_file='Pfizer Inc'
+                    return type_of_file
+                elif 'Clovis Oncology' in lines[i] or 'CLOVIS ONCOLOGY' in lines[i]:
+                    type_of_file='Clovis Oncology'
+                    return type_of_file
+                elif 'Roche Pharma' in lines[i]:
+                    type_of_file='Roche Pharma'
+                    return type_of_file
+                else:
+                    print("Hay un archivo que no cumple este formato "+ pdf)
     
     else:
          print('No tiene' + 'Nombre del archivo: '+ pdf )
@@ -105,6 +105,19 @@ for pdf in pdfs:
 
 #Definimos la función para detectar los datos de interés. 
 def detectData(string, type_of_partner):
+                if 'Pfizer Inc' in lines[i]:
+                    type_of_file='Pfizer Inc'
+                    return type_of_file
+                elif 'Clovis Oncology' in lines[i] or 'CLOVIS ONCOLOGY' in lines[i]:
+                    type_of_file='Clovis Oncology'
+                    return type_of_file
+                elif 'Roche Pharma' in lines[i]:
+                    type_of_file='Roche Pharma'
+                    return type_of_file
+
+    if type_of_partner=='Pfizer Inc':
+        pass
+    elif type_of_partner=='Clovis Oncology':
 
     #Creamos una lista con las lineas separadas. 
     lines = list(filter(None,string.split('\n')))
@@ -115,6 +128,7 @@ def detectData(string, type_of_partner):
     genomic_signatures, alts_signatures = [], []
     unknown_signatures, alts_unknown = [], []
     
+
     for i in range(len(lines)):
         #print(lines[i])
         if 'FMI Test Order #' in lines[i]:
