@@ -28,6 +28,29 @@ def convert_pdf_to_txt(path):
 
     return str.replace("\\n","\n")
 
+#Debido a que existen distintos tipos de archivo, vamos a crear una función que detecte qué tipo de archivo es: 
+
+def detect_type_of_file(string):
+    #Eliminamos las tabulaciones. 
+    #lines = list(filter(None,string.split('\n')))
+
+    if 'Test Type' in string: #Comprobamos si existe el test type en el archivo.
+        lines = list(filter(None,string.split('\n')))
+        for i in range(len(lines)):
+            if 'Test Type' in lines[i]:
+                if 'Liquid' in lines[i]:
+                    test_type='Liquid'
+                    return test_type
+                elif 'FoundationOne DX1' in lines[i]:
+                    test_type='FoundationOne DX1'
+                    return test_type
+                elif '(SOLID)' in lines[i]:
+                    test_type='Solid'
+                    return test_type
+    else:
+        test_type="No_Type"
+        return test_type
+
 
 #Definimos la función para detectar los datos de interés. 
 def detectData(string):
