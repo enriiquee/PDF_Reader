@@ -31,29 +31,80 @@ def convert_pdf_to_txt(path):
 #Debido a que existen distintos tipos de archivo, vamos a crear una función que detecte qué tipo de archivo es: 
 
 def detect_type_of_file(string):
+    #Comprobamos que los archivos contengan el Partner Name, ya que existen de Clovis, de Pfizer y de Roche
+    type_of_file=""
+    if 'Partner Name' in string or 'PARTNER NAME' in string: 
+    lines = list(filter(None,string.split('\n'))) 
+    for i in range(len(lines)): #Comprobamos de que tipo de Partner es. 
+        if 'Partner Name' in lines[i] or 'PARTNER NAME' in lines[i]:
+            print(lines[i] + 'Nombre del archivo: '+ pdf )
+            if 'Pfizer Inc' in lines[i]:
+                type_of_file='Pfizer Inc'
+                return type_of_file
+            elif 'Clovis Oncology' in lines[i] or 'CLOVIS ONCOLOGY' in lines[i]:
+                type_of_file='Clovis Oncology'
+                return type_of_file
+            elif 'Roche Pharma' in lines[i]:
+                type_of_file='Roche Pharma'
+                return type_of_file
+            else:
+                print("Hay un archivo que no cumple este formato "+ pdf)
+    
+    else:
+         print('No tiene' + 'Nombre del archivo: '+ pdf )
+
     #Eliminamos las tabulaciones. 
     #lines = list(filter(None,string.split('\n')))
 
-    if 'Test Type' in string: #Comprobamos si existe el test type en el archivo.
-        lines = list(filter(None,string.split('\n')))
-        for i in range(len(lines)):
-            if 'Test Type' in lines[i]:
-                if 'Liquid' in lines[i]:
-                    test_type='Liquid'
-                    return test_type
-                elif 'FoundationOne DX1' in lines[i]:
-                    test_type='FoundationOne DX1'
-                    return test_type
-                elif '(SOLID)' in lines[i]:
-                    test_type='Solid'
-                    return test_type
-    else:
-        test_type="No_Type"
-        return test_type
+    # if 'Test Type' in string: #Comprobamos si existe el test type en el archivo.
+    #     lines = list(filter(None,string.split('\n')))
+    #     for i in range(len(lines)):
+    #         if 'Test Type' in lines[i]:
+    #             if 'Liquid' in lines[i]:
+    #                 test_type='Liquid'
+    #                 return test_type
+    #             elif 'FoundationOne DX1' in lines[i]:
+    #                 test_type='FoundationOne DX1'
+    #                 return test_type
+    #             elif '(SOLID)' in lines[i]:
+    #                 test_type='Solid'
+    #                 return test_type
+    # else:
+    #     test_type="No_Type"
+    #     return test_type
+    #     print("No tiene tipo de muestra")
+        
+
+path=r'C:/Users/enriq/Dropbox/Lector_adobe/PDF/'
+
+#Change directory
+os.chdir(path)
+#Create a list with the pdf files. 
+pdfs = []
+for file in glob.glob("*.pdf"):
+    pdfs.append(file)
+#print (pdfs)
+
+#Create a list where we are going to save our dictionaries generated. 
+dicts_fundation_one=[]
+for pdf in pdfs:
+    string = convert_pdf_to_txt(pdf)
+    #print(string)
+    #print("NOMBRE DEL PDF: "+ pdf +"\n"+string)
+    print(detect_type_of_file(string))
+        
+
+
+# #path = r'/Users/pax-32/Dropbox/Lector_adobe/PDF/sangre.pdf'
+# path=r'C:/Users/enriq/Dropbox/Lector_adobe/PDF/DX1.pdf'
+
+# string=convert_pdf_to_txt(path)
+# detect_type_of_file(string)
+
 
 
 #Definimos la función para detectar los datos de interés. 
-def detectData(string):
+def detectData(string, type_of_partner):
 
     #Creamos una lista con las lineas separadas. 
     lines = list(filter(None,string.split('\n')))
