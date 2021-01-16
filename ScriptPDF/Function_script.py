@@ -33,8 +33,8 @@ def convert_pdf_to_txt(path):
 def detect_type_of_file(string):
     #Comprobamos que los archivos contengan el Partner Name, ya que existen de Clovis, de Pfizer y de Roche
     type_of_file=""
-    lines = list(filter(None,string.split('\n'))) 
-    if 'Partner Name' in lines or 'PARTNER NAME' in lines: 
+    if 'Partner Name' in string or 'PARTNER NAME' in string: 
+        lines = list(filter(None,string.split('\n'))) 
         for i in range(len(lines)): #Comprobamos de que tipo de Partner es. 
             if 'Partner Name' in lines[i] or 'PARTNER NAME' in lines[i]:
                 #print(lines[i] + 'Nombre del archivo: '+ pdf )
@@ -90,13 +90,14 @@ def detectData(string, type_of_partner):
 
 def detectData_Clovis(string):
     pass
+    
 
 
 
 
 
 def detectData_Pfizer(string):
-#Creamos una lista con las lineas separadas. 
+    #Creamos una lista con las lineas separadas. 
     lines = list(filter(None,string.split('\n')))
    
     custData = {} #Diccionario donde se van a ir guardando todas las variables
@@ -134,14 +135,14 @@ def detectData_Pfizer(string):
         
 
 
-#path = r'/Users/pax-32/Dropbox/Lector_adobe/PDF/sangre.pdf'
+path = r'/Users/pax-32/Dropbox/Lector_adobe/PDF/sangre.pdf'
 # path=r'C:/Users/enriq/Dropbox/Lector_adobe/PDF/sangre.pdf'
 
-# string=convert_pdf_to_txt(path)
-# test=detect_type_of_file(string)
-# print(test)
+string=convert_pdf_to_txt(path)
+test=detect_type_of_file(string)
+print(test)
 
-# custData=detectData(string,test)
+custData=detectData(string,test)
 
 
 
