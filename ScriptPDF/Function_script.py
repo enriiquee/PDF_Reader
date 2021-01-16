@@ -33,11 +33,11 @@ def convert_pdf_to_txt(path):
 def detect_type_of_file(string):
     #Comprobamos que los archivos contengan el Partner Name, ya que existen de Clovis, de Pfizer y de Roche
     type_of_file=""
-    if 'Partner Name' in string or 'PARTNER NAME' in string: 
-        lines = list(filter(None,string.split('\n'))) 
+    lines = list(filter(None,string.split('\n'))) 
+    if 'Partner Name' in lines or 'PARTNER NAME' in lines: 
         for i in range(len(lines)): #Comprobamos de que tipo de Partner es. 
             if 'Partner Name' in lines[i] or 'PARTNER NAME' in lines[i]:
-                print(lines[i] + 'Nombre del archivo: '+ pdf )
+                #print(lines[i] + 'Nombre del archivo: '+ pdf )
                 if 'Pfizer Inc' in lines[i]:
                     type_of_file='Pfizer Inc'
                     return type_of_file
@@ -75,49 +75,81 @@ def detect_type_of_file(string):
     #     print("No tiene tipo de muestra")
         
 
-path=r'C:/Users/enriq/Dropbox/Lector_adobe/PDF/'
+#Definimos la función para detectar los datos de interés. 
+def detectData(string, type_of_partner):
+    if type_of_partner=='Pfizer Inc':
+        print("Detecto Pfizer")
+        return detectData_Pfizer(string)
+    elif type_of_partner=='Clovis Oncology':
+        print("Detecto Clovis")
+        return detectData_Clovis(string)
+    elif type_of_partner=='Roche Pharma':
+        print("Detecto Roche")
+        return detectData_Roche(string)
+
+
+def detectData_Clovis(string):
+    pass
+
+
+
+
+
+def detectData_Pfizer(string):
+#Creamos una lista con las lineas separadas. 
+    lines = list(filter(None,string.split('\n')))
+   
+    custData = {} #Diccionario donde se van a ir guardando todas las variables
+    genes_pot, alts_pot = [], [] 
+    genenomic_findings, alts_findings = [], []
+    genomic_signatures, alts_signatures = [], []
+    unknown_signatures, alts_unknown = [], []
+
+    print(lines)
+
+    #Vemos que tipo de FoundationOne es. 
+    if 'Test Type FoundationOne Liquid AB1' in lines:
+        print("He encontrado")
+    else:
+        print("Nop")
+
+
+#path=r'C:/Users/enriq/Dropbox/Lector_adobe/PDF/'
 
 #Change directory
-os.chdir(path)
-#Create a list with the pdf files. 
-pdfs = []
-for file in glob.glob("*.pdf"):
-    pdfs.append(file)
-#print (pdfs)
+#os.chdir(path)
+# #Create a list with the pdf files. 
+# pdfs = []
+# for file in glob.glob("*.pdf"):
+#     pdfs.append(file)
+# #print (pdfs)
 
-#Create a list where we are going to save our dictionaries generated. 
-dicts_fundation_one=[]
-for pdf in pdfs:
-    string = convert_pdf_to_txt(pdf)
-    #print(string)
-    #print("NOMBRE DEL PDF: "+ pdf +"\n"+string)
-    print(detect_type_of_file(string))
+# #Create a list where we are going to save our dictionaries generated. 
+# dicts_fundation_one=[]
+# for pdf in pdfs:
+#     string = convert_pdf_to_txt(pdf)
+#     #print(string)
+#     #print("NOMBRE DEL PDF: "+ pdf +"\n"+string)
+#     print(detect_type_of_file(string))
         
 
 
-# #path = r'/Users/pax-32/Dropbox/Lector_adobe/PDF/sangre.pdf'
-# path=r'C:/Users/enriq/Dropbox/Lector_adobe/PDF/DX1.pdf'
+#path = r'/Users/pax-32/Dropbox/Lector_adobe/PDF/sangre.pdf'
+# path=r'C:/Users/enriq/Dropbox/Lector_adobe/PDF/sangre.pdf'
 
 # string=convert_pdf_to_txt(path)
-# detect_type_of_file(string)
+# test=detect_type_of_file(string)
+# print(test)
+
+# custData=detectData(string,test)
 
 
 
-#Definimos la función para detectar los datos de interés. 
-def detectData(string, type_of_partner):
-                if 'Pfizer Inc' in lines[i]:
-                    type_of_file='Pfizer Inc'
-                    return type_of_file
-                elif 'Clovis Oncology' in lines[i] or 'CLOVIS ONCOLOGY' in lines[i]:
-                    type_of_file='Clovis Oncology'
-                    return type_of_file
-                elif 'Roche Pharma' in lines[i]:
-                    type_of_file='Roche Pharma'
-                    return type_of_file
 
-    if type_of_partner=='Pfizer Inc':
-        pass
-    elif type_of_partner=='Clovis Oncology':
+
+
+
+def detectData_Roche(string):
 
     #Creamos una lista con las lineas separadas. 
     lines = list(filter(None,string.split('\n')))
@@ -127,6 +159,7 @@ def detectData(string, type_of_partner):
     genenomic_findings, alts_findings = [], []
     genomic_signatures, alts_signatures = [], []
     unknown_signatures, alts_unknown = [], []
+    
     
 
     for i in range(len(lines)):

@@ -1,4 +1,5 @@
-from ScriptPDF.Function_script import *
+
+from .Function_script import *
 
 #Start script
 if __name__ == '__main__':
@@ -14,11 +15,15 @@ if __name__ == '__main__':
 
     #Create a list where we are going to save our dictionaries generated. 
     dicts_fundation_one=[]
+    dicts_clovis=[]
+    dicts_Unknown=[]
     for pdf in pdfs:
         string = convert_pdf_to_txt(pdf)
-        print(string)
+        type_of_Partner=detect_type_of_file(string)
+        #print(string)
         #print("NOMBRE DEL PDF: "+ pdf +"\n"+string)
-        custData=detectData(string)
+        custData=detectData(string,type_of_Partner)
+        
         if custData["Test_Type"]=="FoundationOne DX1":
             #print(custData.keys())
             dicts_fundation_one.append(custData)
