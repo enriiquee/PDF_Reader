@@ -1,17 +1,22 @@
 
-from .Function_script import *
+from Function_script import *
+import glob2
 
 #Start script
 if __name__ == '__main__':
     
     #path of folder containing several PDFs
-    path = r'/Users/pax-32/Dropbox/Lector_adobe/'     
+    
+    #path = r'/Users/pax-32/Dropbox/Lector_adobe/' 
+    path=r'C:/Users/enriq/Dropbox/Lector_adobe/PDF/'    
     #Change directory
     os.chdir(path)
     #Create a list with the pdf files. 
     pdfs = []
-    for file in glob.glob("*.pdf"):
+    for file in glob2.glob("**/*.pdf"):
         pdfs.append(file)
+    
+
 
     #Create a list where we are going to save our dictionaries generated. 
     dicts_fundation_one=[]
@@ -23,16 +28,17 @@ if __name__ == '__main__':
         #print(string)
         #print("NOMBRE DEL PDF: "+ pdf +"\n"+string)
         custData=detectData(string,type_of_Partner)
+        dicts_fundation_one.append(custData)
         
-        if custData["Test_Type"]=="FoundationOne DX1":
-            #print(custData.keys())
-            dicts_fundation_one.append(custData)
-        else:
-            pass
+        # if custData["Test_Type"]=="FoundationOne DX1":
+        #     #print(custData.keys())
+        #     dicts_fundation_one.append(custData)
+        # else:
+        #     pass
 
 
 
 
-#Detect what type of chip we have: 
+# Detect what type of chip we have: 
 
-fundation_one_generator(dicts_fundation_one)
+    fundation_one_generator(dicts_fundation_one)
