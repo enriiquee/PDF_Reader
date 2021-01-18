@@ -89,6 +89,22 @@ def detectData(string, type_of_partner):
 
 
 def detectData_Clovis(string):
+    """
+    Allow to extract info from Clovis Oncology 
+    :Param: string
+    :return : Dictionary with all the elements extracted.
+    """
+    #Creamos una lista con las lineas separadas. 
+    lines = list(filter(None,string.split('\n')))
+    custData = {} #Diccionario donde se van a ir guardando todas las variables
+    genes_pot, alts_pot = [], [] 
+    genenomic_findings, alts_findings = [], []
+    genomic_signatures, alts_signatures = [], []
+    unknown_signatures, alts_unknown = [], []
+
+
+    if 'FoundationOne Liquid' 
+
     pass
 
 
@@ -115,6 +131,72 @@ def detectData_Pfizer(string):
     #Vemos que tipo de FoundationOne es:
     if 'Test Type FoundationOne Liquid AB1' in lines:
         print("Liquid")
+        for i in range(len(lines)):
+            print(lines[i])
+            if 'FMI Test Order #' in lines[i]:
+                custData['FMI_Test'] = lines[i+1]
+            elif 'Subject ID' in lines[i]:
+                custData['Subjet'] = lines[i+1]
+            elif 'Test Type' in lines[i]:
+                custData['Test_Type'] = lines[i][10:]
+            elif 'Report Date' in lines[i]:
+                custData['Date'] = lines[i][12:]
+            elif 'Partner Name' in lines[i]:
+                custData['Partner_Name']= lines[i][13:]        
+            elif 'Partner Study ID' in lines[i]:
+                custData['Partner_Study'] = lines[i][17:]
+            elif 'FMI Study ID' in lines[i]:
+                if 'TEST' not in lines[i+1]:
+                    custData['FMI_Study_ID'] = lines[i][13:]+lines[i+1]
+                else:
+                    custData['FMI_Study_ID'] = lines[i][13:]  
+            elif 'Site ID' in lines[i]:
+                custData['Site_ID'] = lines[i][8:]
+            elif 'Date of Birth' in lines[i]:
+                custData['Date_of_Birth'] = lines[i][14:]   
+            elif 'Diagnosis' in lines[i]:
+                custData['Diagnosis'] = lines[i][10:]
+            elif 'Specimen ID' in lines[i]:
+                custData['Specimen_ID'] = lines[i][12:]
+            elif 'Sample Type' in lines[i]:
+                custData['Sample_type'] = lines[i][12:]
+            elif 'Site' in lines[i]:
+                custData['Site'] = lines[i][5:]
+            elif 'Collection Date' in lines[i]:
+                custData['Collection_Date'] = lines[i][16:]
+            elif 'Received Date' in lines[i]:
+                custData['Received_Date'] = lines[i][14:]
+            elif 'Visit Type' in lines[i]:
+                custData['Visit_Type'] = lines[i][11:]
+            elif "STUDY-RELATED ALTERATION(S) IDENTIFIED" in lines[i]:
+                        #print(lines[i])
+                        while lines[i]!='GENE':
+                            print(lines[i])
+                            i+=1
+                        try:
+                            i+=1
+                            while "ALTERATION" not in lines[i]: 
+                                genenomic_findings.append(lines[i])
+                                i+=1
+
+                            if "ALTERATION" in lines[i]:
+                                j=0
+                                i+=1
+                                #print(lines[i])
+                                while j<len(genenomic_findings):
+                                    alts_findings.append(lines[i])
+                                    j+=1
+                                    i+=1
+                        except:
+                            print("STUDY-RELATED ALTERATION(S) IDENTIFIED")
+        #For genenomic_findings
+        for gene in genenomic_findings:
+            custData[gene] = "" #initialize a blank string to add to
+        for gene, alt in zip(genenomic_findings, alts_findings):
+            custData[gene] = custData[gene] + ";" + alt
+            custData[gene] = custData[gene].strip(";")
+        
+        return custData
         
 
     #Comprobamos que sea SOLID
