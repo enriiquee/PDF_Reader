@@ -110,15 +110,20 @@ def detectData_Clovis(string):
 
     #We do the classification between the two types of files that we have with foundationOne Liquid
 
-    if 'Test Type FoundationOne Liquid' in lines:
+    if 'Test Type FoundationOne Liquid' in lines or 'Test Type FoundationOne' in lines:
         if 'GENOMIC FINDINGS' in lines:
-            # print("Naranja")
+            print("Naranja")
+            
+            target_ibdex = lines.index('Result')
+            lines=lines[:target_ibdex+1]
             for i in range(len(lines)):
-                print(lines[i])
-                if 'FMI Test Order #' in lines[i]:
-                    custData['FMI_Test'] = lines[i+1]
+                #print(lines[i])
+                if 'FMI Test Order' in lines[i]:
+                    if 'FMI_Test' not in custData:
+                        custData['FMI_Test'] = lines[i+1]
                 elif 'Subject ID' in lines[i]:
-                    custData['Subjet'] = lines[i+1]
+                    if 'Subjet' not in custData:
+                        custData['Subjet'] = lines[i+1]
                 elif 'Test Type' in lines[i]:
                     custData['Test_Type'] = lines[i][10:]
                 elif 'Partner Name' in lines[i]:
@@ -128,7 +133,7 @@ def detectData_Clovis(string):
                 elif 'FMI Study ID' in lines[i]:
                     custData['FMI_Study_ID'] = lines[i][13:]  
                 elif 'Report Date' in lines[i]:
-                    custData['Date'] = lines[i+1]
+                    custData['Date'] = lines[i][11:]
                 elif 'Site ID' in lines[i]:
                     custData['Site_ID'] = lines[i][8:]
                 elif 'Date of Birth' in lines[i]:
@@ -237,12 +242,15 @@ def detectData_Clovis(string):
             return custData
         
         elif 'STUDY-RELATED DELETERIOUS ALTERATION(S)' in lines:
+            print('Blanco/Negro')
             for i in range(len(lines)):
                 # print(lines[i])
                 if 'FMI Test Order #' in lines[i]:
-                    custData['FMI_Test'] = lines[i+1]
+                    if 'FMI_Test' not in custData:
+                        custData['FMI_Test'] = lines[i+1]
                 elif 'Subject ID' in lines[i]:
-                    custData['Subjet'] = lines[i+1]
+                    if 'Subjet' not in custData:
+                        custData['Subjet'] = lines[i+1]
                 elif 'Test Type' in lines[i]:
                     custData['Test_Type'] = lines[i][10:]
                 elif 'Report Date' in lines[i]:
@@ -258,8 +266,8 @@ def detectData_Clovis(string):
                         custData['FMI_Study_ID'] = lines[i][13:]  
                 elif 'Site ID' in lines[i]:
                     custData['Site_ID'] = lines[i][8:]
-                elif 'Date of Birth' in lines[i]:
-                    custData['Date_of_Birth'] = lines[i][14:]   
+                elif 'Year of Birth' in lines[i]:
+                    custData['Date_of_Birth'] = lines[i][13:]   
                 elif 'Diagnosis' in lines[i]:
                     custData['Diagnosis'] = lines[i][10:]
                 elif 'Specimen ID' in lines[i]:
@@ -326,8 +334,9 @@ def detectData_Pfizer(string):
         # print("Liquid")
         for i in range(len(lines)):
             # print(lines[i])
-            if 'FMI Test Order #' in lines[i]:
-                custData['FMI_Test'] = lines[i+1]
+            if 'FMI Test Order' in lines[i]:
+                if 'FMI_Test' not in custData:
+                    custData['FMI_Test'] = lines[i+1]
             elif 'Subject ID' in lines[i]:
                 custData['Subjet'] = lines[i+1]
             elif 'Test Type' in lines[i]:
@@ -397,8 +406,9 @@ def detectData_Pfizer(string):
         # print("Solid")
         for i in range(len(lines)):
             # print(lines[i])
-            if 'FMI Test Order #' in lines[i]:
-                custData['FMI_Test'] = lines[i+1]
+            if 'FMI Test Order' in lines[i]:
+                if 'FMI_Test' not in custData:
+                    custData['FMI_Test'] = lines[i+1]
             elif 'Subject ID' in lines[i]:
                 custData['Subjet'] = lines[i+1]
             elif 'Test Type' in lines[i]:
@@ -462,12 +472,6 @@ def detectData_Pfizer(string):
 
     # If the sample is liquid or Liquid AB1
 
-
-
-
-    else:
-        pass
-
 def detectData_Roche(string):
     """
     Extract the data from Roche files
@@ -486,10 +490,12 @@ def detectData_Roche(string):
 
     for i in range(len(lines)):
         #print(lines[i])
-        if 'FMI Test Order #' in lines[i]:
-            custData['FMI_Test'] = lines[i+1]
+        if 'FMI Test Order' in lines[i]:
+            if 'FMI_Test' not in custData:
+                custData['FMI_Test'] = lines[i+1]
         elif 'Subject ID' in lines[i]:
-            custData['Subjet'] = lines[i+1]
+            if 'Subjet' not in custData:
+                custData['Subjet'] = lines[i+1]
         elif 'Test Type' in lines[i]:
             custData['Test_Type'] = lines[i][10:]
         elif 'Partner Name' in lines[i]:

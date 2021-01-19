@@ -44,12 +44,15 @@ def tkinter_GUI():
             #print("NOMBRE DEL PDF: "+ pdf +"\n"+string)
             my_progressbar['value']+=value_progress_increasse
             root.update_idletasks
-            custData=detectData(string)
-            if custData["Test_Type"]=="FoundationOne DX1":
-                #print(custData.keys())
-                dicts_fundation_one.append(custData)
-            else:
-                pass
+            type_of_Partner=detect_type_of_file(string)
+            custData=detectData(string,type_of_Partner)
+            dicts_fundation_one.append(custData)
+
+            # if custData["Test_Type"]=="FoundationOne DX1":
+            #     #print(custData.keys())
+            #     dicts_fundation_one.append(custData)
+            # else:
+            #     pass
         
         fundation_one_generator(dicts_fundation_one)
         #Message info:
