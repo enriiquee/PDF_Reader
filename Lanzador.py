@@ -4,6 +4,7 @@ from tkinter import filedialog
 import os
 from tkinter import messagebox
 from ScriptPDF.Function_script import *
+import glob2
 
 
 #Start tkinter gui function
@@ -31,7 +32,7 @@ def tkinter_GUI():
         os.chdir(folder)
         #Create a list with the pdf files. 
         pdfs = []
-        for file in glob.glob("*.pdf"):
+        for file in glob2.glob("**/*.pdf"):
             pdfs.append(file)
             
         

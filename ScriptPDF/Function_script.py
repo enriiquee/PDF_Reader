@@ -331,7 +331,7 @@ def detectData_Pfizer(string):
 
     #Vemos que tipo de FoundationOne es:
     if 'Test Type FoundationOne Liquid AB1' in lines:
-        # print("Liquid")
+        print("Liquido")
         for i in range(len(lines)):
             # print(lines[i])
             if 'FMI Test Order' in lines[i]:
@@ -403,7 +403,7 @@ def detectData_Pfizer(string):
 
     #Comprobamos que sea SOLID
     elif 'Test Type FoundationOne DX1 (SOLID)' in lines:
-        # print("Solid")
+        print("Solid")
         for i in range(len(lines)):
             # print(lines[i])
             if 'FMI Test Order' in lines[i]:
@@ -469,7 +469,8 @@ def detectData_Pfizer(string):
         
         return custData
 
-
+    elif 'Test Type FoundationOne DX1' in lines:
+        print('FoundationOne DX1 solo')
     # If the sample is liquid or Liquid AB1
 
 def detectData_Roche(string):
