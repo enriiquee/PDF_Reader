@@ -405,7 +405,7 @@ def detectData_Pfizer(string):
     elif 'Test Type FoundationOne DX1 (SOLID)' in lines:
         print("Solid")
         for i in range(len(lines)):
-            # print(lines[i])
+            print(lines[i])
             if 'FMI Test Order' in lines[i]:
                 if 'FMI_Test' not in custData:
                     custData['FMI_Test'] = lines[i+1]
@@ -471,6 +471,113 @@ def detectData_Pfizer(string):
 
     elif 'Test Type FoundationOne DX1' in lines:
         print('FoundationOne DX1 solo')
+
+        if 'GENOMIC FINDINGS' in lines:
+            print("Naranja")
+                
+        #target_ibdex = lines.index('Result')
+        #lines=lines[:target_ibdex+1]
+        for i in range(len(lines)):
+            print(lines[i])
+            if 'FMI Test Order' in lines[i]:
+                if 'FMI_Test' not in custData:
+                    custData['FMI_Test'] = lines[i+1]
+            elif 'Subject ID' in lines[i]:
+                if 'Subjet' not in custData:
+                    custData['Subjet'] = lines[i+1]
+            elif 'Test Type' in lines[i]:
+                custData['Test_Type'] = lines[i][10:]
+            elif 'Partner Name' in lines[i]:
+                custData['Partner_Name']= lines[i][13:]        
+            elif 'Partner Study ID' in lines[i]:
+                custData['Partner_Study'] = lines[i][17:]
+            elif 'FMI Study ID' in lines[i]:
+                custData['FMI_Study_ID'] = lines[i][13:]  
+            elif 'Report Date' in lines[i]:
+                custData['Date'] = lines[i][11:]
+            elif 'Site ID' in lines[i]:
+                custData['Site_ID'] = lines[i][8:]
+            elif 'Date of Birth' in lines[i]:
+                custData['Date_of_Birth'] = lines[i][14:]   
+            elif 'Diagnosis' in lines[i]:
+                custData['Diagnosis'] = lines[i][10:]
+            elif 'Specimen ID' in lines[i]:
+                custData['Specimen_ID'] = lines[i][12:]
+            elif 'Sample Type' in lines[i]:
+                custData['Sample_type'] = lines[i][12:]
+            elif 'Site' in lines[i]:
+                custData['Site'] = lines[i][5:]
+            elif 'Collection Date' in lines[i]:
+                custData['Collection_Date'] = lines[i][16:]
+            elif 'Received Date' in lines[i]:
+                custData['Received_Date'] = lines[i][14:]
+            elif 'Visit Type' in lines[i]:
+                custData['Visit_Type'] = lines[i][11:]
+
+            #GENOMIC FINDINGS
+            elif "GENOMIC FINDINGS" in lines[i]:
+                #print(lines[i])
+                while lines[i]!='GENE':
+                    #print(lines[i])
+                    i+=1
+                try:
+                    i+=1
+                    while "ALTERATION" not in lines[i]: 
+                        genenomic_findings.append(lines[i])
+                        i+=1
+
+                    if "ALTERATION" in lines[i]:
+                        i+=1
+                        #print(lines[i])
+                        while "GENOMIC SIGNATURES" not in lines[i]:
+                            alts_findings.append(lines[i])
+                            i+=1
+                except:
+                    print("Error in Genomic Findings")
+
+            #Biomarker
+            elif 'GENOMIC SIGNATURES' in lines[i]:
+                try:
+                    while lines[i]!='Biomarker':
+                        i+=1
+
+                    i+=1
+                    while 'Result' not in lines[i]:
+                        if 'Not Evaluable' in lines[i]:
+                            genomic_signatures.append(lines[i][:-14])
+                            alts_signatures.append(lines[i][-13:])
+                            i+=1
+                        else:
+                            genomic_signatures.append(lines[i])
+                            alts_signatures.append(lines[i+1])
+                            i+=1
+                except:
+                    print("Error in genomic signatures")
+                    
+            #Variants of unkwnon significance
+            elif "VARIANTS OF UNKNOWN SIGNIFICANCE" in lines[i]:
+                while lines[i]!='GENE':
+                    #print(lines[i])
+                    i+=1
+                try:
+                    i+=1
+                    while "ALTERATION" not in lines[i]: 
+                        #print(lines[i])
+                        unknown_signatures.append(lines[i])
+                        i+=1
+
+                    if "ALTERATION" in lines[i]:
+                        i+=1
+                        #print(lines[i])
+                        while "Foundation" not in lines[i]:
+                            alts_unknown.append(lines[i])
+                            i+=1
+                except:
+                    print("Error in Genomic Findings")   
+        print(alts_findings, alts_signatures)     
+
+    
+
     # If the sample is liquid or Liquid AB1
 
 def detectData_Roche(string):
