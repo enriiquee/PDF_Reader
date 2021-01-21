@@ -119,7 +119,7 @@ def detectData_Clovis(string, pdf):
             #lines=lines[:target_ibdex+1]
             first_iter=True
             for i in range(len(lines)):
-                #print(lines[i])
+                print(lines[i])
                 if 'FMI Test Order' in lines[i]:
                     if 'FMI_Test' not in custData:
                         custData['FMI_Test'] = lines[i+1]
@@ -135,7 +135,10 @@ def detectData_Clovis(string, pdf):
                 elif 'FMI Study ID' in lines[i]:
                     custData['FMI_Study_ID'] = lines[i][13:]  
                 elif 'Report Date' in lines[i]:
-                    custData['Date'] = lines[i][11:]
+                    if lines[i][11:]=="":
+                        custData['Date']=lines[i+1]
+                    else:
+                        custData['Date'] = lines[i][11:]
                 elif 'Site ID' in lines[i]:
                     custData['Site_ID'] = lines[i][8:]
                 elif 'Date of Birth' in lines[i]:
@@ -187,7 +190,7 @@ def detectData_Clovis(string, pdf):
                     try:
                         while 'Biomarker' not in lines[i]:
                             i+=1
-
+##########################
                         i+=1
                         while 'Result' not in lines[i]:
                             if 'Not Evaluable' in lines[i]:
@@ -231,8 +234,8 @@ def detectData_Clovis(string, pdf):
  
         
             #Now create a dictionary in order to produce and excel file: 
-            # print(genenomic_findings, alts_findings)
-            # print(genomic_signatures,alts_signatures)
+            #print(genenomic_findings, alts_findings)
+            print(genomic_signatures,alts_signatures)
             #print(unknown_signatures,alts_unknown )
             
             #For genenomic_findings
