@@ -80,21 +80,21 @@ def detect_type_of_file(string):
     #     return test_type
     #     print("No tiene tipo de muestra")
         
-def detectData(string, type_of_partner):
+def detectData(string, type_of_partner, pdf):
     """
     Here we detect what kind of data we have based on Partner Name used previously. 
     """
     if type_of_partner=='Pfizer Inc':
         print("Detecto Pfizer")
-        return detectData_Pfizer(string)
+        return detectData_Pfizer(string, pdf)
     elif type_of_partner=='Clovis Oncology':
         print("Detecto Clovis")
-        return detectData_Clovis(string)
+        return detectData_Clovis(string, pdf)
     elif type_of_partner=='Roche Pharma':
         print("Detecto Roche")
-        return detectData_Roche(string)
+        return detectData_Roche(string, pdf)
 
-def detectData_Clovis(string):
+def detectData_Clovis(string, pdf):
     """
     Allow to extract info from Clovis Oncology 
     :Param: string
@@ -107,6 +107,7 @@ def detectData_Clovis(string):
     genenomic_findings, alts_findings = [], []
     genomic_signatures, alts_signatures = [], []
     unknown_signatures, alts_unknown = [], []
+    custData['File']=pdf
 
     #We do the classification between the two types of files that we have with foundationOne Liquid
 
@@ -114,8 +115,9 @@ def detectData_Clovis(string):
         if 'GENOMIC FINDINGS' in lines:
             print("Naranja")
             
-            target_ibdex = lines.index('Result')
-            lines=lines[:target_ibdex+1]
+            #target_ibdex = lines.index('Result')
+            #lines=lines[:target_ibdex+1]
+            first_iter=True
             for i in range(len(lines)):
                 #print(lines[i])
                 if 'FMI Test Order' in lines[i]:
@@ -162,36 +164,49 @@ def detectData_Clovis(string):
                     try:
                         i+=1
                         while "ALTERATION" not in lines[i]: 
-                            genenomic_findings.append(lines[i])
-                            i+=1
+                            if 'GENOMIC SIGNATURES' in lines[i]:
+                                i+=1
+                            else:
+                                genenomic_findings.append(lines[i])
+                                i+=1
 
                         if "ALTERATION" in lines[i]:
+                            j=0
                             i+=1
                             #print(lines[i])
-                            while "GENOMIC SIGNATURES" not in lines[i]:
+                            while j<len(genenomic_findings):
                                 alts_findings.append(lines[i])
+                                j+=1
                                 i+=1
                     except:
-                        print("Error in Genomic Findings")
+                        print("Error in Genomic Findings " + pdf)
 
                #Biomarker
-                elif 'GENOMIC SIGNATURES' in lines[i]:
+                elif 'GENOMIC SIGNATURES' in lines[i] and first_iter:
+                    first_iter=False
                     try:
-                        while lines[i]!='Biomarker':
+                        while 'Biomarker' not in lines[i]:
                             i+=1
 
                         i+=1
                         while 'Result' not in lines[i]:
                             if 'Not Evaluable' in lines[i]:
                                 genomic_signatures.append(lines[i][:-14])
-                                alts_signatures.append(lines[i][-13:])
+                                genomic_signatures.append(lines[i][-13:])
                                 i+=1
                             else:
                                 genomic_signatures.append(lines[i])
-                                alts_signatures.append(lines[i+1])
+                                i+=1
+                        if "Result" in lines[i]:
+                            j=0
+                            i+=1
+                            #print(lines[i])
+                            while j<len(genomic_signatures):
+                                alts_signatures.append(lines[i])
+                                j+=1
                                 i+=1
                     except:
-                        print("Error in genomic signatures")
+                        print("Error in genomic signatures " +pdf )
                         
                 #Variants of unkwnon significance
                 elif "VARIANTS OF UNKNOWN SIGNIFICANCE" in lines[i]:
@@ -212,11 +227,14 @@ def detectData_Clovis(string):
                                 alts_unknown.append(lines[i])
                                 i+=1
                     except:
-                        print("Error in Genomic Findings")      
+                        print("Error in Genomic Findings " +pdf)      
  
         
             #Now create a dictionary in order to produce and excel file: 
-
+            # print(genenomic_findings, alts_findings)
+            # print(genomic_signatures,alts_signatures)
+            #print(unknown_signatures,alts_unknown )
+            
             #For genenomic_findings
             for gene in genenomic_findings:
                 custData[gene] = "" #initialize a blank string to add to
@@ -302,7 +320,7 @@ def detectData_Clovis(string):
                                         j+=1
                                         i+=1
                             except:
-                                print("STUDY-RELATED ALTERATION(S) IDENTIFIED")
+                                print("STUDY-RELATED ALTERATION(S) IDENTIFIED "+ pdf)
             #For genenomic_findings
             for gene in genenomic_findings:
                 custData[gene] = "" #initialize a blank string to add to
@@ -312,7 +330,7 @@ def detectData_Clovis(string):
             
             return custData
 
-def detectData_Pfizer(string):
+def detectData_Pfizer(string, pdf):
     """
     Allow to extract info from Pfizer files
     :Param: string
@@ -326,6 +344,7 @@ def detectData_Pfizer(string):
     genenomic_findings, alts_findings = [], []
     genomic_signatures, alts_signatures = [], []
     unknown_signatures, alts_unknown = [], []
+    custData['File']=pdf
 
     #print(lines)
 
@@ -390,7 +409,7 @@ def detectData_Pfizer(string):
                                     j+=1
                                     i+=1
                         except:
-                            print("STUDY-RELATED ALTERATION(S) IDENTIFIED")
+                            print("STUDY-RELATED ALTERATION(S) IDENTIFIED "+ pdf)
         #For genenomic_findings
         for gene in genenomic_findings:
             custData[gene] = "" #initialize a blank string to add to
@@ -405,7 +424,7 @@ def detectData_Pfizer(string):
     elif 'Test Type FoundationOne DX1 (SOLID)' in lines:
         print("Solid")
         for i in range(len(lines)):
-            print(lines[i])
+            # print(lines[i])
             if 'FMI Test Order' in lines[i]:
                 if 'FMI_Test' not in custData:
                     custData['FMI_Test'] = lines[i+1]
@@ -459,7 +478,7 @@ def detectData_Pfizer(string):
                                     j+=1
                                     i+=1
                         except:
-                            print("Error in Genomic Findings")          
+                            print("Error in Genomic Findings "+ pdf)          
         #For genenomic_findings
         for gene in genenomic_findings:
             custData[gene] = "" #initialize a blank string to add to
@@ -473,12 +492,13 @@ def detectData_Pfizer(string):
         print('FoundationOne DX1 solo')
 
         if 'GENOMIC FINDINGS' in lines:
+            first_iter=True
             print("Naranja")
                 
         #target_ibdex = lines.index('Result')
         #lines=lines[:target_ibdex+1]
         for i in range(len(lines)):
-            print(lines[i])
+            #print(lines[i])
             if 'FMI Test Order' in lines[i]:
                 if 'FMI_Test' not in custData:
                     custData['FMI_Test'] = lines[i+1]
@@ -494,7 +514,10 @@ def detectData_Pfizer(string):
             elif 'FMI Study ID' in lines[i]:
                 custData['FMI_Study_ID'] = lines[i][13:]  
             elif 'Report Date' in lines[i]:
-                custData['Date'] = lines[i][11:]
+                if lines[i][11:]=="":
+                    custData['Date']=lines[i+1]
+                else:
+                    custData['Date'] = lines[i][11:]
             elif 'Site ID' in lines[i]:
                 custData['Site_ID'] = lines[i][8:]
             elif 'Date of Birth' in lines[i]:
@@ -533,26 +556,31 @@ def detectData_Pfizer(string):
                             alts_findings.append(lines[i])
                             i+=1
                 except:
-                    print("Error in Genomic Findings")
+                    print("Error in Genomic Findings "+ pdf)
 
             #Biomarker
-            elif 'GENOMIC SIGNATURES' in lines[i]:
+            elif 'GENOMIC SIGNATURES' in lines[i] and first_iter:
+                first_iter=False
                 try:
                     while lines[i]!='Biomarker':
                         i+=1
 
                     i+=1
                     while 'Result' not in lines[i]:
-                        if 'Not Evaluable' in lines[i]:
-                            genomic_signatures.append(lines[i][:-14])
-                            alts_signatures.append(lines[i][-13:])
+                        genomic_signatures.append(lines[i])
+                        i+=1
+                        
+                    if "Result" in lines[i]:
+                        j=0
+                        i+=1
+                        #print(lines[i])
+                        while j<len(genomic_signatures):
+                            alts_signatures.append(lines[i])
+                            j+=1
                             i+=1
-                        else:
-                            genomic_signatures.append(lines[i])
-                            alts_signatures.append(lines[i+1])
-                            i+=1
+                        
                 except:
-                    print("Error in genomic signatures")
+                    print("Error in genomic signatures "+pdf)
                     
             #Variants of unkwnon significance
             elif "VARIANTS OF UNKNOWN SIGNIFICANCE" in lines[i]:
@@ -567,20 +595,49 @@ def detectData_Pfizer(string):
                         i+=1
 
                     if "ALTERATION" in lines[i]:
+                        j=0
                         i+=1
                         #print(lines[i])
-                        while "Foundation" not in lines[i]:
+                        while j<len(unknown_signatures):
                             alts_unknown.append(lines[i])
+                            j+=1
                             i+=1
                 except:
-                    print("Error in Genomic Findings")   
-        print(alts_findings, alts_signatures)     
+                    print("Error in Genomic Findings "+pdf)  
+                    
+                    
+        #For genenomic_findings
+        for gene in genenomic_findings:
+            custData[gene] = "" #initialize a blank string to add to
+        for gene, alt in zip(genenomic_findings, alts_findings):
+            custData[gene] = custData[gene] + ";" + alt
+            custData[gene] = custData[gene].strip(";")
+            
+        #For genomic_signatures
+        for gene in genomic_signatures:
+            custData[gene] = "" #initialize a blank string to add to
+        for gene, alt in zip(genomic_signatures, alts_signatures):
+            custData[gene] = custData[gene] + ";" + alt
+            custData[gene] = custData[gene].strip(";")
+
+        #For unknown_signatures
+        for gene in unknown_signatures:
+            custData[gene] = "" #initialize a blank string to add to
+        for gene, alt in zip(unknown_signatures, alts_unknown):
+            custData[gene] = custData[gene] + ";" + alt
+            custData[gene] = custData[gene].strip(";") 
+        
+        # print(genenomic_findings, alts_findings)   
+        # print(genomic_signatures, alts_signatures) 
+        # print(unknown_signatures, alts_unknown) 
+        
+        return custData
 
     
 
     # If the sample is liquid or Liquid AB1
 
-def detectData_Roche(string):
+def detectData_Roche(string, pdf):
     """
     Extract the data from Roche files
     """
@@ -593,7 +650,7 @@ def detectData_Roche(string):
     genenomic_findings, alts_findings = [], []
     genomic_signatures, alts_signatures = [], []
     unknown_signatures, alts_unknown = [], []
-    
+    custData['File']=pdf    
     
 
     for i in range(len(lines)):
@@ -655,7 +712,7 @@ def detectData_Roche(string):
                             alts_pot.append(lines[i])
                             i+=1
             except:
-                print("Error in Potential Enrollment Eligible Alterations")
+                print("Error in Potential Enrollment Eligible Alterations "+pdf)
 
         #Genomic signatures
         elif "GENOMIC FINDINGS" in lines[i]:
@@ -676,7 +733,7 @@ def detectData_Roche(string):
                         alts_findings.append(lines[i])
                         i+=1
             except:
-                print("Error in Genomic Findings")
+                print("Error in Genomic Findings "+pdf)
                 
         #Variants of unkwnon significance
         elif "VARIANTS OF UNKNOWN SIGNIFICANCE" in lines[i]:
@@ -697,7 +754,7 @@ def detectData_Roche(string):
                         alts_unknown.append(lines[i])
                         i+=1
             except:
-                print("Error in Genomic Findings")      
+                print("Error in Genomic Findings "+pdf)      
         #Biomarker
         elif 'GENOMIC SIGNATURES' in lines[i]:
             while lines[i]!='Biomarker':
@@ -714,7 +771,7 @@ def detectData_Roche(string):
                         alts_signatures.append(lines[i+1])
                         i+=2
             except:
-                print("Error in genomic signatures Biomarkers")
+                print("Error in genomic signatures Biomarkers "+pdf)
 
     #print(genomic_signatures)
     #print(alts_signatures)
@@ -759,7 +816,7 @@ def fundation_one_generator(dicts_fundation_one):
     :output: excel file. 
     """
     #Elements of foundation: 
-    foundation_one = ['FMI_Test', 'Subjet', 'Date', 'Test_Type', 'Specimen_ID', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'Partner_Study', 'FMI_Study_ID', 'Site_ID', 'Date_of_Birth', 'Diagnosis',"ABL1","ACVR1B","AKT1","AKT2","AKT3","ALK","ALOX12B","AMER1", "APC","AR","ARAF","ARFRP1","ARID1A","ASXL1","ATM","ATR","ATRX","AURKA","AURKB","AXIN1","AXL","BAP1","BARD1","BCL2","BCL2L1","BCL2L2","BCL6","BCOR","BCORL1","BRAF","BRCA1","BRCA2","BRD4","BRIP1","BTG1","BTG2","BTK","C11orf30","CALR","CARD11","CASP8","CBFB","CBL","CCND1","CCND2","CCND3","CCNE1","CD22","CD274","CD70","CD79A","CD79B","CDC73","CDH1","CDK12","CDK4","CDK6","CDK8","CDKN1A","CDKN1B","CDKN2A","CDKN2B","CDKN2C","CEBPA","CHEK1","CHEK2","CIC","CREBBP","CRKL","CSF1R","CSF3R","CTCF","CTNNA1","CTNNB1","CUL3","CUL4A","CXCR4","CYP17A1","DAXX","DDR1","DDR2","DIS3","DNMT3A","DOT1L","EED","EGFR","EP300","EPHA3","EPHB1","EPHB4","ERBB2","ERBB3","ERBB4","ERCC4","ERG","ERRFI1","ESR1","EZH2","FAM46C","FANCA","FANCC","FANCG","FANCL","FAS","FBXW7","FGF10","FGF12","FGF14","FGF19","FGF23","FGF3","FGF4","FGF6","FGFR1","FGFR2","FGFR3","FGFR4","FH","FLCN","FLT1","FLT3","FOXL2","FUBP1","GABRA6","GATA3","GATA4","GATA6","GID4","GNA11","GNA13","GNAQ","GNAS","GRM3","GSK3B","H3F3A","HDAC1","HGF","HNF1A","HRAS","HSD3B1","ID3","IDH1","IDH2","IGF1R","IKBKE","IKZF1","INPP4B","IRF2","IRF4","IRS2","JAK1","JAK2","JAK3","JUN","KDM5A","KDM5C","KDM6A","KDR","KEAP1","KEL","KIT","KLHL6","KMT2A","KMT2D","KRAS","LTK","LYN","MAF","MAP2K1","MAP2K2","MAP2K4","MAP3K1","MAP3K13","MAPK1","MCL1","MDM2","MDM4","MED12","MEF2B","MEN1","MERTK","MET","MITF","MKNK1","MLH1","MPL","MRE11A","MSH2","MSH3","MSH6","MST1R","MTAP","MTOR","MUTYH","MYC","MYCL","MYCN","MYD88","NBN","NF1","NF2","NFE2L2","NFKBIA","NKX2-1","NOTCH1","NOTCH2","NOTCH3","NPM1","NRAS","NT5C2","NTRK1","NTRK2","NTRK3","P2RY8","PALB2","PARK2","PARP1","PARP2","PARP3","PAX5","PBRM1","PDCD1","PDCD1LG2","PDGFRA","PDGFRB","PDK1","PIK3C2B","PIK3C2G","PIK3CA","PIK3CB","PIK3R1","PIM1","PMS2","POLD1","POLE","PPARG","PPP2R1A","PPP2R2A","PRDM1","PRKAR1A","PRKCI","PTCH1","PTEN","PTPN11","PTPRO","QKI","RAC1","RAD21","RAD51","RAD51B","RAD51C","RAD51D","RAD52","RAD54L","RAF1","RARA","RB1","RBM10","REL","RET","RICTOR","RNF43","ROS1","RPTOR","SDHA","SDHB","SDHC","SDHD","SETD2","SF3B1","SGK1","SMAD2","SMAD4","SMARCA4","SMARCB1","SMO","SNCAIP","SOCS1","SOX2","SOX9","SPEN","SPOP","SRC","STAG2","STAT3","STK11","SUFU","SYK","TBX3","TEK","TET2","TGFBR2","TIPARP","TNFAIP3","TNFRSF14","TP53","TSC1","TSC2","TYRO3","U2AF1","VEGFA","VHL","WHSC1","WHSC1L1","WT1","XPO1","XRCC2","ZNF217","ZNF703"]
+    foundation_one = ['File','FMI_Test', 'Subjet', 'Date', 'Test_Type', 'Specimen_ID', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'Partner_Study', 'FMI_Study_ID', 'Site_ID', 'Date_of_Birth', 'Diagnosis',"ABL1","ACVR1B","AKT1","AKT2","AKT3","ALK","ALOX12B","AMER1", "APC","AR","ARAF","ARFRP1","ARID1A","ASXL1","ATM","ATR","ATRX","AURKA","AURKB","AXIN1","AXL","BAP1","BARD1","BCL2","BCL2L1","BCL2L2","BCL6","BCOR","BCORL1","BRAF","BRCA1","BRCA2","BRD4","BRIP1","BTG1","BTG2","BTK","C11orf30","CALR","CARD11","CASP8","CBFB","CBL","CCND1","CCND2","CCND3","CCNE1","CD22","CD274","CD70","CD79A","CD79B","CDC73","CDH1","CDK12","CDK4","CDK6","CDK8","CDKN1A","CDKN1B","CDKN2A","CDKN2B","CDKN2C","CEBPA","CHEK1","CHEK2","CIC","CREBBP","CRKL","CSF1R","CSF3R","CTCF","CTNNA1","CTNNB1","CUL3","CUL4A","CXCR4","CYP17A1","DAXX","DDR1","DDR2","DIS3","DNMT3A","DOT1L","EED","EGFR","EP300","EPHA3","EPHB1","EPHB4","ERBB2","ERBB3","ERBB4","ERCC4","ERG","ERRFI1","ESR1","EZH2","FAM46C","FANCA","FANCC","FANCG","FANCL","FAS","FBXW7","FGF10","FGF12","FGF14","FGF19","FGF23","FGF3","FGF4","FGF6","FGFR1","FGFR2","FGFR3","FGFR4","FH","FLCN","FLT1","FLT3","FOXL2","FUBP1","GABRA6","GATA3","GATA4","GATA6","GID4","GNA11","GNA13","GNAQ","GNAS","GRM3","GSK3B","H3F3A","HDAC1","HGF","HNF1A","HRAS","HSD3B1","ID3","IDH1","IDH2","IGF1R","IKBKE","IKZF1","INPP4B","IRF2","IRF4","IRS2","JAK1","JAK2","JAK3","JUN","KDM5A","KDM5C","KDM6A","KDR","KEAP1","KEL","KIT","KLHL6","KMT2A","KMT2D","KRAS","LTK","LYN","MAF","MAP2K1","MAP2K2","MAP2K4","MAP3K1","MAP3K13","MAPK1","MCL1","MDM2","MDM4","MED12","MEF2B","MEN1","MERTK","MET","MITF","MKNK1","MLH1","MPL","MRE11A","MSH2","MSH3","MSH6","MST1R","MTAP","MTOR","MUTYH","MYC","MYCL","MYCN","MYD88","NBN","NF1","NF2","NFE2L2","NFKBIA","NKX2-1","NOTCH1","NOTCH2","NOTCH3","NPM1","NRAS","NT5C2","NTRK1","NTRK2","NTRK3","P2RY8","PALB2","PARK2","PARP1","PARP2","PARP3","PAX5","PBRM1","PDCD1","PDCD1LG2","PDGFRA","PDGFRB","PDK1","PIK3C2B","PIK3C2G","PIK3CA","PIK3CB","PIK3R1","PIM1","PMS2","POLD1","POLE","PPARG","PPP2R1A","PPP2R2A","PRDM1","PRKAR1A","PRKCI","PTCH1","PTEN","PTPN11","PTPRO","QKI","RAC1","RAD21","RAD51","RAD51B","RAD51C","RAD51D","RAD52","RAD54L","RAF1","RARA","RB1","RBM10","REL","RET","RICTOR","RNF43","ROS1","RPTOR","SDHA","SDHB","SDHC","SDHD","SETD2","SF3B1","SGK1","SMAD2","SMAD4","SMARCA4","SMARCB1","SMO","SNCAIP","SOCS1","SOX2","SOX9","SPEN","SPOP","SRC","STAG2","STAT3","STK11","SUFU","SYK","TBX3","TEK","TET2","TGFBR2","TIPARP","TNFAIP3","TNFRSF14","TP53","TSC1","TSC2","TYRO3","U2AF1","VEGFA","VHL","WHSC1","WHSC1L1","WT1","XPO1","XRCC2","ZNF217","ZNF703"]
     df = pd.DataFrame(data=None, columns=foundation_one, dtype=None, copy=False)
 
     for d in dicts_fundation_one:

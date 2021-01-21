@@ -46,7 +46,7 @@ def tkinter_GUI():
             my_progressbar['value']+=value_progress_increasse
             root.update_idletasks
             type_of_Partner=detect_type_of_file(string)
-            custData=detectData(string,type_of_Partner)
+            custData=detectData(string,type_of_Partner,pdf)
             dicts_fundation_one.append(custData)
 
             # if custData["Test_Type"]=="FoundationOne DX1":
