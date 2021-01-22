@@ -113,13 +113,13 @@ def detectData_Clovis(string, pdf):
 
     if 'Test Type FoundationOne Liquid' in lines or 'Test Type FoundationOne' in lines:
         if 'GENOMIC FINDINGS' in lines:
-            print("Naranja")
+            #print("Naranja")
             
             #target_ibdex = lines.index('Result')
             #lines=lines[:target_ibdex+1]
             first_iter=True
             for i in range(len(lines)):
-                print(lines[i])
+                # print(lines[i])
                 if 'FMI Test Order' in lines[i]:
                     if 'FMI_Test' not in custData:
                         custData['FMI_Test'] = lines[i+1]
@@ -190,7 +190,6 @@ def detectData_Clovis(string, pdf):
                     try:
                         while 'Biomarker' not in lines[i]:
                             i+=1
-##########################
                         i+=1
                         while 'Result' not in lines[i]:
                             if 'Not Evaluable' in lines[i]:
@@ -198,16 +197,20 @@ def detectData_Clovis(string, pdf):
                                 genomic_signatures.append(lines[i][-13:])
                                 i+=1
                             else:
+ 
                                 genomic_signatures.append(lines[i])
                                 i+=1
                         if "Result" in lines[i]:
-                            j=0
-                            i+=1
-                            #print(lines[i])
-                            while j<len(genomic_signatures):
-                                alts_signatures.append(lines[i])
-                                j+=1
+                            if 'Electronically' in lines[i+1]:
                                 i+=1
+                            else:
+                                j=0
+                                i+=1
+                                #print(lines[i])
+                                while j<len(genomic_signatures):
+                                    alts_signatures.append(lines[i])
+                                    j+=1
+                                    i+=1
                     except:
                         print("Error in genomic signatures " +pdf )
                         
@@ -235,7 +238,7 @@ def detectData_Clovis(string, pdf):
         
             #Now create a dictionary in order to produce and excel file: 
             #print(genenomic_findings, alts_findings)
-            print(genomic_signatures,alts_signatures)
+            #print(genomic_signatures,alts_signatures)
             #print(unknown_signatures,alts_unknown )
             
             #For genenomic_findings
@@ -333,6 +336,153 @@ def detectData_Clovis(string, pdf):
             
             return custData
 
+    else:
+        for i in range(len(lines)):
+            # print(lines[i])
+            if 'FMI Test Order' in lines[i]:
+                if 'FMI_Test' not in custData:
+                    custData['FMI_Test'] = lines[i+1]
+            elif 'Subject ID' in lines[i]:
+                if 'Subjet' not in custData:
+                    custData['Subjet'] = lines[i+1]
+            elif 'Test Type' in lines[i]:
+                custData['Test_Type'] = lines[i][10:]
+            elif 'Partner Name' in lines[i]:
+                custData['Partner_Name']= lines[i][13:]        
+            elif 'Partner Study ID' in lines[i]:
+                custData['Partner_Study'] = lines[i][17:]
+            elif 'FMI Study ID' in lines[i]:
+                custData['FMI_Study_ID'] = lines[i][13:]  
+            elif 'Report Date' in lines[i]:
+                if lines[i][11:]=="":
+                    custData['Date']=lines[i+1]
+                else:
+                    custData['Date'] = lines[i][11:]
+            elif 'Site ID' in lines[i]:
+                custData['Site_ID'] = lines[i][8:]
+            elif 'Date of Birth' in lines[i]:
+                custData['Date_of_Birth'] = lines[i][14:]   
+            elif 'Diagnosis' in lines[i]:
+                custData['Diagnosis'] = lines[i][10:]
+            elif 'Specimen ID' in lines[i]:
+                custData['Specimen_ID'] = lines[i][12:]
+            elif 'Sample Type' in lines[i]:
+                custData['Sample_type'] = lines[i][12:]
+            elif 'Site' in lines[i]:
+                custData['Site'] = lines[i][5:]
+            elif 'Collection Date' in lines[i]:
+                custData['Collection_Date'] = lines[i][16:]
+            elif 'Received Date' in lines[i]:
+                custData['Received_Date'] = lines[i][14:]
+            elif 'Visit Type' in lines[i]:
+                custData['Visit_Type'] = lines[i][11:]
+
+            #GENOMIC FINDINGS
+        #     elif "GENOMIC FINDINGS" in lines[i]:
+        #         #print(lines[i])
+        #         while lines[i]!='GENE':
+        #             #print(lines[i])
+        #             i+=1
+        #         try:
+        #             i+=1
+        #             while "ALTERATION" not in lines[i]: 
+        #                 if 'GENOMIC SIGNATURES' in lines[i]:
+        #                     i+=1
+        #                 else:
+        #                     genenomic_findings.append(lines[i])
+        #                     i+=1
+
+        #             if "ALTERATION" in lines[i]:
+        #                 j=0
+        #                 i+=1
+        #                 #print(lines[i])
+        #                 while j<len(genenomic_findings):
+        #                     alts_findings.append(lines[i])
+        #                     j+=1
+        #                     i+=1
+        #         except:
+        #             print("Error in Genomic Findings " + pdf)
+
+        #    #Biomarker
+        #     elif 'GENOMIC SIGNATURES' in lines[i] and first_iter:
+        #         first_iter=False
+        #         try:
+        #             while 'Biomarker' not in lines[i]:
+        #                 i+=1
+        #             i+=1
+        #             while 'Result' not in lines[i]:
+        #                 if 'Not Evaluable' in lines[i]:
+        #                     genomic_signatures.append(lines[i][:-14])
+        #                     genomic_signatures.append(lines[i][-13:])
+        #                     i+=1
+        #                 else:
+
+        #                     genomic_signatures.append(lines[i])
+        #                     i+=1
+        #             if "Result" in lines[i]:
+        #                 if 'Electronically' in lines[i+1]:
+        #                     i+=1
+        #                 else:
+        #                     j=0
+        #                     i+=1
+        #                     #print(lines[i])
+        #                     while j<len(genomic_signatures):
+        #                         alts_signatures.append(lines[i])
+        #                         j+=1
+        #                         i+=1
+        #         except:
+        #             print("Error in genomic signatures " +pdf )
+                    
+        #     #Variants of unkwnon significance
+        #     elif "VARIANTS OF UNKNOWN SIGNIFICANCE" in lines[i]:
+        #         while lines[i]!='GENE':
+        #             #print(lines[i])
+        #             i+=1
+        #         try:
+        #             i+=1
+        #             while "ALTERATION" not in lines[i]: 
+        #                 #print(lines[i])
+        #                 unknown_signatures.append(lines[i])
+        #                 i+=1
+
+        #             if "ALTERATION" in lines[i]:
+        #                 i+=1
+        #                 #print(lines[i])
+        #                 while "Foundation" not in lines[i]:
+        #                     alts_unknown.append(lines[i])
+        #                     i+=1
+        #         except:
+        #             print("Error in Genomic Findings " +pdf)      
+
+    
+        #Now create a dictionary in order to produce and excel file: 
+        #print(genenomic_findings, alts_findings)
+        #print(genomic_signatures,alts_signatures)
+        #print(unknown_signatures,alts_unknown )
+        
+        #For genenomic_findings
+        # for gene in genenomic_findings:
+        #     custData[gene] = "" #initialize a blank string to add to
+        # for gene, alt in zip(genenomic_findings, alts_findings):
+        #     custData[gene] = custData[gene] + ";" + alt
+        #     custData[gene] = custData[gene].strip(";")
+            
+        # #For genomic_signatures
+        # for gene in genomic_signatures:
+        #     custData[gene] = "" #initialize a blank string to add to
+        # for gene, alt in zip(genomic_signatures, alts_signatures):
+        #     custData[gene] = custData[gene] + ";" + alt
+        #     custData[gene] = custData[gene].strip(";")
+
+        # #For unknown_signatures
+        # for gene in unknown_signatures:
+        #     custData[gene] = "" #initialize a blank string to add to
+        # for gene, alt in zip(unknown_signatures, alts_unknown):
+        #     custData[gene] = custData[gene] + ";" + alt
+        #     custData[gene] = custData[gene].strip(";")
+
+        print(custData)
+        return custData
 def detectData_Pfizer(string, pdf):
     """
     Allow to extract info from Pfizer files
@@ -353,7 +503,7 @@ def detectData_Pfizer(string, pdf):
 
     #Vemos que tipo de FoundationOne es:
     if 'Test Type FoundationOne Liquid AB1' in lines:
-        print("Liquido")
+        #print("Liquido")
         for i in range(len(lines)):
             # print(lines[i])
             if 'FMI Test Order' in lines[i]:
@@ -501,7 +651,7 @@ def detectData_Pfizer(string, pdf):
         #target_ibdex = lines.index('Result')
         #lines=lines[:target_ibdex+1]
         for i in range(len(lines)):
-            #print(lines[i])
+            print(lines[i])
             if 'FMI Test Order' in lines[i]:
                 if 'FMI_Test' not in custData:
                     custData['FMI_Test'] = lines[i+1]
@@ -549,15 +699,20 @@ def detectData_Pfizer(string, pdf):
                 try:
                     i+=1
                     while "ALTERATION" not in lines[i]: 
-                        genenomic_findings.append(lines[i])
-                        i+=1
+                        if 'GENOMIC SIGNATURES' in lines[i]:
+                            i+=1
+                        else:
+                            genenomic_findings.append(lines[i])
+                            i+=1
 
                     if "ALTERATION" in lines[i]:
+                        j=0
                         i+=1
                         #print(lines[i])
-                        while "GENOMIC SIGNATURES" not in lines[i]:
+                        while j<len(genenomic_findings):
                             alts_findings.append(lines[i])
                             i+=1
+                            j+=1
                 except:
                     print("Error in Genomic Findings "+ pdf)
 
@@ -630,8 +785,8 @@ def detectData_Pfizer(string, pdf):
             custData[gene] = custData[gene] + ";" + alt
             custData[gene] = custData[gene].strip(";") 
         
-        # print(genenomic_findings, alts_findings)   
-        # print(genomic_signatures, alts_signatures) 
+        print(genenomic_findings, alts_findings)   
+        #print(genomic_signatures, alts_signatures) 
         # print(unknown_signatures, alts_unknown) 
         
         return custData
@@ -766,7 +921,7 @@ def detectData_Roche(string, pdf):
                 i+=1
                 while 'Result' not in lines[i]:
                     if 'Tumor Mutational' in lines[i]:
-                        genomic_signatures.append(lines[i][0:24])
+                        genomic_signatures.append(lines[i][0:23])
                         alts_signatures.append(lines[i][24:])
                         i+=1
                     else:
@@ -776,8 +931,9 @@ def detectData_Roche(string, pdf):
             except:
                 print("Error in genomic signatures Biomarkers "+pdf)
 
-    #print(genomic_signatures)
-    #print(alts_signatures)
+    #print(genenomic_findings, alts_findings)
+    #print(genomic_signatures,alts_signatures)
+    #print(unknown_signatures,alts_unknown )
 
     #Now create a dictionary in order to produce and excel file: 
 
