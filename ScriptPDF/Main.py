@@ -37,7 +37,7 @@ if __name__ == '__main__':
         #     dicts_fundation_one.append(custData)
         # else:
         #     pass
-    print(custData)
+    # print(custData)
 
 
 
