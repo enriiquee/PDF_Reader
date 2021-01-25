@@ -33,7 +33,7 @@ def convert_pdf_to_txt(path):
 
     return str.replace("\\n","\n")
 
-def detect_type_of_file(string):
+def detect_type_of_file(string, pdf):
     """
     Because there are different file types, we will create a function that detects what type of file it is: 
     We check that the files contain the Partner Name, as they exist of Clovis, Pfizer and Roche
@@ -53,11 +53,14 @@ def detect_type_of_file(string):
                 elif 'Roche Pharma' in lines[i]:
                     type_of_file='Roche Pharma'
                     return type_of_file
+                elif 'BRISTOL-MYERS' in lines[i]:
+                    type_of_file='Bristol-Myers'
+                    return type_of_file
                 else:
-                    print("Hay un archivo que no cumple este formato ")
+                    print("Hay un archivo que no cumple este formato "+pdf)
     
     else:
-         print('No tiene' + 'Nombre del archivo: '+ pdf )
+         print('No tiene.' + 'Nombre del archivo: '+ pdf )
 
     #Eliminamos las tabulaciones. 
     #lines = list(filter(None,string.split('\n')))
@@ -93,6 +96,9 @@ def detectData(string, type_of_partner, pdf):
     elif type_of_partner=='Roche Pharma':
         print("Detecto Roche")
         return detectData_Roche(string, pdf)
+    elif type_of_partner=='Bristol-Myers':
+        print("Detecto Bristol")
+        return detectData_Bristol(string,pdf)
 
 def detectData_Clovis(string, pdf):
     """
@@ -338,18 +344,20 @@ def detectData_Clovis(string, pdf):
 
     else:
         first_iter=True
+        custData['Test_Type']='Foundation Medicine'
+        custData['Visit_Type']='Not applicable'
+        custData['Date_of_Birth']='Not applicable'
         for i in range(len(lines)):
-            print(lines[i])
+            #print(lines[i])
             if 'FMI Test Order' in lines[i]:
-                if 'FMI_Test' not in custData:
-                    custData['FMI_Test'] = lines[i+1]
+                custData['FMI_Test'] = lines[i][12:]
             elif 'PARTNER SUBJECT ID' in lines[i]:
                 if 'Subjet' not in custData:
                     custData['Subjet'] = lines[i+1]
             elif 'PARTNER NAME' in lines[i]:
                 custData['Partner_Name']= lines[i][13:]        
-            elif 'Partner Study ID' in lines[i]:
-                custData['PARTNER STUDY ID'] = lines[i][17:]
+            elif 'PARTNER STUDY ID' in lines[i]:
+                custData['Partner Study ID'] = lines[i][17:]
             elif 'FMI STUDY ID' in lines[i]:
                 custData['FMI_Study_ID'] = lines[i][13:]  
             elif 'REPORT DATE' in lines[i]:
@@ -367,6 +375,8 @@ def detectData_Clovis(string, pdf):
                 custData['Specimen_ID'] = lines[i][14:]
             elif 'SAMPLE TYPE' in lines[i]:
                 custData['Sample_type'] = lines[i][12:]
+                if custData['Sample_type']=='Peripheral Blood':
+                    custData['Site']=lines[i][23:]
             elif 'Site' in lines[i]:
                 custData['Site'] = lines[i][5:]
             elif 'COLLECTION DATE' in lines[i]:
@@ -453,33 +463,34 @@ def detectData_Clovis(string, pdf):
 
     
         #Now create a dictionary in order to produce and excel file: 
-        print(genenomic_findings, alts_findings)
-        print(genomic_signatures,alts_signatures)
-        print(unknown_signatures,alts_unknown )
+        # print(genenomic_findings, alts_findings)
+        # print(genomic_signatures,alts_signatures)
+        # print(unknown_signatures,alts_unknown )
         
         #For genenomic_findings
-        # for gene in genenomic_findings:
-        #     custData[gene] = "" #initialize a blank string to add to
-        # for gene, alt in zip(genenomic_findings, alts_findings):
-        #     custData[gene] = custData[gene] + ";" + alt
-        #     custData[gene] = custData[gene].strip(";")
+        for gene in genenomic_findings:
+            custData[gene] = "" #initialize a blank string to add to
+        for gene, alt in zip(genenomic_findings, alts_findings):
+            custData[gene] = custData[gene] + ";" + alt
+            custData[gene] = custData[gene].strip(";")
             
         # #For genomic_signatures
-        # for gene in genomic_signatures:
-        #     custData[gene] = "" #initialize a blank string to add to
-        # for gene, alt in zip(genomic_signatures, alts_signatures):
-        #     custData[gene] = custData[gene] + ";" + alt
-        #     custData[gene] = custData[gene].strip(";")
+        for gene in genomic_signatures:
+            custData[gene] = "" #initialize a blank string to add to
+        for gene, alt in zip(genomic_signatures, alts_signatures):
+            custData[gene] = custData[gene] + ";" + alt
+            custData[gene] = custData[gene].strip(";")
 
         # #For unknown_signatures
-        # for gene in unknown_signatures:
-        #     custData[gene] = "" #initialize a blank string to add to
-        # for gene, alt in zip(unknown_signatures, alts_unknown):
-        #     custData[gene] = custData[gene] + ";" + alt
-        #     custData[gene] = custData[gene].strip(";")
+        for gene in unknown_signatures:
+            custData[gene] = "" #initialize a blank string to add to
+        for gene, alt in zip(unknown_signatures, alts_unknown):
+            custData[gene] = custData[gene] + ";" + alt
+            custData[gene] = custData[gene].strip(";")
 
-        print(custData)
+        #print(custData)
         return custData
+
 def detectData_Pfizer(string, pdf):
     """
     Allow to extract info from Pfizer files
@@ -645,10 +656,10 @@ def detectData_Pfizer(string, pdf):
             first_iter=True
             print("Naranja")
                 
-        #target_ibdex = lines.index('Result')
-        #lines=lines[:target_ibdex+1]
+            #target_ibdex = lines.index('Result')
+            #lines=lines[:target_ibdex+1]
         for i in range(len(lines)):
-            print(lines[i])
+            # print(lines[i])
             if 'FMI Test Order' in lines[i]:
                 if 'FMI_Test' not in custData:
                     custData['FMI_Test'] = lines[i+1]
@@ -782,13 +793,156 @@ def detectData_Pfizer(string, pdf):
             custData[gene] = custData[gene] + ";" + alt
             custData[gene] = custData[gene].strip(";") 
         
-        print(genenomic_findings, alts_findings)   
+        #print(genenomic_findings, alts_findings)   
         #print(genomic_signatures, alts_signatures) 
         # print(unknown_signatures, alts_unknown) 
         
         return custData
 
+    else:
+        first_iter=True
+        for i in range(len(lines)):
+            # print(lines[i])
+            if 'FMI SAMPLE ID' in lines[i]:
+                if 'FMI_Test' not in custData:
+                    custData['FMI_Test'] = lines[i][14:]
+            elif 'Subject ID' in lines[i]:
+                if 'Subjet' not in custData:
+                    custData['Subjet'] = lines[i+1]
+            elif 'PARTNER NAME' in lines[i]:
+                custData['Partner_Name']= lines[i][13:]        
+            elif 'PARTNER STUDY ID' in lines[i]:
+                custData['Partner Study ID'] = lines[i][17:]
+            elif 'FMI STUDY ID' in lines[i]:
+                custData['FMI_Study_ID'] = lines[i][13:]  
+            elif 'REPORT DATE' in lines[i]:
+                if lines[i][11:]=="":
+                    custData['Date']=lines[i+1]
+                else:
+                    custData['Date'] = lines[i][11:]
+            elif 'Site ID' in lines[i]:
+                custData['Site_ID'] = lines[i][8:]
+            elif 'PATIENT DATE OF BIRTH' in lines[i]:
+                custData['Date_of_Birth'] = lines[i][21:]   
+            elif 'DIAGNOSIS' in lines[i]:
+                custData['Diagnosis'] = lines[i][10:]
+            elif 'SPECIMEN TYPE' in lines[i]:
+                custData['Specimen_ID'] = lines[i][14:]
+            elif 'SAMPLE TYPE' in lines[i]:
+                custData['Sample_type'] = lines[i][12:]
+            elif 'Site' in lines[i]:
+                custData['Site'] = lines[i][5:]
+            elif 'COLLECTION DATE' in lines[i]:
+                custData['Collection_Date'] = lines[i][16:]
+            elif 'RECEIVED DATE' in lines[i]:
+                custData['Received_Date'] = lines[i][14:]
+            elif 'Visit Type' in lines[i]:
+                custData['Visit_Type'] = lines[i][11:]
+
+            #GENOMIC FINDINGS
+            elif "Enrollment Criteria" in lines[i]:
+                #print(lines[i])
+                while lines[i]!='Gene Name':
+                    #print(lines[i])
+                    i+=1
+                try:
+                    i+=1
+                    while "Alteration" not in lines[i]: 
+                        genenomic_findings.append(lines[i])
+                        i+=1
+
+                    if "Alteration" in lines[i]:
+                        j=0
+                        i+=1
+                        #print(lines[i])
+                        while j<len(genenomic_findings):
+                            alts_findings.append(lines[i])
+                            j+=1
+                            i+=1
+                except:
+                    print("Error in Genomic Findings " + pdf)
+
+           #Biomarker
+            elif 'Cancer Related Alterations Identified' in lines[i] and first_iter:
+                first_iter=False
+                try:
+                    while 'GENE' not in lines[i]:
+                        i+=1
+                    i+=1
+                    while 'ALTERATION' not in lines[i]:
+                        if 'Not Evaluable' in lines[i]:
+                            genomic_signatures.append(lines[i][:-14])
+                            genomic_signatures.append(lines[i][-13:])
+                            i+=1
+                        else:
+                            genomic_signatures.append(lines[i])
+                            i+=1
+                    if "ALTERATION" in lines[i]:
+                        if 'Electronically' in lines[i+1]:
+                            i+=1
+                        else:
+                            j=0
+                            i+=1
+                            #print(lines[i])
+                            while j<len(genomic_signatures):
+                                alts_signatures.append(lines[i])
+                                j+=1
+                                i+=1
+                except:
+                    print("Error in genomic signatures " +pdf )
+                    
+            #Variants of unkwnon significance
+            elif "Variants of Unknown Significance Identified" in lines[i]:
+                while lines[i]!='GENE':
+                    #print(lines[i])
+                    i+=1
+                try:
+                    i+=1
+                    while "ALTERATION" not in lines[i]: 
+                        #print(lines[i])
+                        unknown_signatures.append(lines[i])
+                        i+=1
+
+                    if "ALTERATION" in lines[i]:
+                        i+=1
+                        j=0
+                        #print(lines[i])
+                        while j<len(unknown_signatures):
+                            alts_unknown.append(lines[i])
+                            i+=1
+                            j+=1
+                except:
+                    print("Error in Genomic Findings " +pdf)      
+
     
+        #Now create a dictionary in order to produce and excel file: 
+        # print(genenomic_findings, alts_findings)
+        # print(genomic_signatures,alts_signatures)
+        # print(unknown_signatures,alts_unknown )
+        
+        #For genenomic_findings
+        for gene in genenomic_findings:
+            custData[gene] = "" #initialize a blank string to add to
+        for gene, alt in zip(genenomic_findings, alts_findings):
+            custData[gene] = custData[gene] + ";" + alt
+            custData[gene] = custData[gene].strip(";")
+            
+        # #For genomic_signatures
+        for gene in genomic_signatures:
+            custData[gene] = "" #initialize a blank string to add to
+        for gene, alt in zip(genomic_signatures, alts_signatures):
+            custData[gene] = custData[gene] + ";" + alt
+            custData[gene] = custData[gene].strip(";")
+
+        # #For unknown_signatures
+        for gene in unknown_signatures:
+            custData[gene] = "" #initialize a blank string to add to
+        for gene, alt in zip(unknown_signatures, alts_unknown):
+            custData[gene] = custData[gene] + ";" + alt
+            custData[gene] = custData[gene].strip(";")
+
+        #print(custData)
+        return custData
 
     # If the sample is liquid or Liquid AB1
 
@@ -965,6 +1119,170 @@ def detectData_Roche(string, pdf):
 
     return custData
 
+def detectData_Bristol(string,pdf):
+
+    """
+    Allow to extract info from Bristol information 
+    :Param: string
+    :return : Dictionary with all the elements extracted.
+    """
+    #Creamos una lista con las lineas separadas. 
+    lines = list(filter(None,string.split('\n')))
+    custData = {} #Diccionario donde se van a ir guardando todas las variables
+    genes_pot, alts_pot = [], [] 
+    genenomic_findings, alts_findings = [], []
+    genomic_signatures, alts_signatures = [], []
+    unknown_signatures, alts_unknown = [], []
+    custData['File']=pdf
+
+    #We do the classification between the two types of files that we have with foundationOne Liquid
+    
+    first_iter=True
+    custData['Test_Type']='Foundation Medicine'
+    custData['Visit_Type']='Not applicable'
+    #custData['Date_of_Birth']='Not applicable'
+    
+    for i in range(len(lines)):
+        #print(lines[i])
+        if 'FMI Test Order' in lines[i]:
+            custData['FMI_Test'] = lines[i][12:]
+        elif 'PARTNER SUBJECT ID' in lines[i]:
+            if 'Subjet' not in custData:
+                custData['Subjet'] = lines[i+1]
+        elif 'PARTNER NAME' in lines[i]:
+            custData['Partner_Name']= lines[i][13:]        
+        elif 'PARTNER STUDY ID' in lines[i]:
+            custData['Partner Study ID'] = lines[i][17:]
+        elif 'FMI STUDY ID' in lines[i]:
+            custData['FMI_Study_ID'] = lines[i][13:]  
+        elif 'REPORT DATE' in lines[i]:
+            if lines[i][11:]=="":
+                custData['Date']=lines[i+1]
+            else:
+                custData['Date'] = lines[i][11:]
+        elif 'Site ID' in lines[i]:
+            custData['Site_ID'] = lines[i][8:]
+        elif 'SUBJECT DATE OF BIRTH' in lines[i]:
+            custData['Date_of_Birth'] = lines[i][21:]   
+        elif 'DIAGNOSIS' in lines[i]:
+            custData['Diagnosis'] = lines[i+1]
+        elif 'SPECIMEN TYPE' in lines[i]:
+            custData['Specimen_ID'] = lines[i][14:]
+        elif 'SAMPLE TYPE' in lines[i]:
+            custData['Sample_type'] = lines[i][12:]
+            if custData['Sample_type']=='Peripheral Blood':
+                custData['Site']=lines[i][23:]
+        elif 'COLLECTION DATE' in lines[i]:
+            custData['Collection_Date'] = lines[i][16:]
+        elif 'RECEIVED DATE' in lines[i]:
+            custData['Received_Date'] = lines[i][14:]
+ 
+        #GENOMIC FINDINGS
+        elif "STUDY-RELATED DELETERIOUS ALTERATION(S) IDENTIFIED" in lines[i]:
+            #print(lines[i])
+            while lines[i]!='GENE':
+                #print(lines[i])
+                i+=1
+            try:
+                i+=1
+                while "ALTERATION" not in lines[i]: 
+                    genenomic_findings.append(lines[i])
+                    i+=1
+
+                if "ALTERATION" in lines[i]:
+                    j=0
+                    i+=1
+                    #print(lines[i])
+                    while j<len(genenomic_findings):
+                        alts_findings.append(lines[i])
+                        j+=1
+                        i+=1
+            except:
+                print("Error in Genomic Findings " + pdf)
+
+        #Biomarker
+        elif 'CANCER RELATED ALTERATIONS IDENTIFIED' in lines[i] and first_iter:
+            first_iter=False
+            try:
+                while 'GENE' not in lines[i]:
+                    i+=1
+                i+=1
+                while 'ALTERATION' not in lines[i]:
+                    if 'Not Evaluable' in lines[i]:
+                        genomic_signatures.append(lines[i][:-14])
+                        genomic_signatures.append(lines[i][-13:])
+                        i+=1
+                    elif 'No reportable variants detected' in lines[i]:
+                        break
+                    else:
+                        genomic_signatures.append(lines[i])
+                        i+=1
+                if "ALTERATION" in lines[i]:
+                    if 'Electronically' in lines[i+1]:
+                        i+=1
+                    else:
+                        j=0
+                        i+=1
+                        #print(lines[i])
+                        while j<len(genomic_signatures):
+                            alts_signatures.append(lines[i])
+                            j+=1
+                            i+=1
+            except:
+                print("Error in genomic signatures " +pdf )
+            
+        elif "VARIANTS OF UNKNOWN SIGNIFICANCE" in lines[i]:
+            while lines[i]!='GENE':
+                #print(lines[i])
+                i+=1
+            try:
+                i+=1
+                while "ALTERATION" not in lines[i]: 
+                    #print(lines[i])
+                    unknown_signatures.append(lines[i])
+                    i+=1
+
+                if "ALTERATION" in lines[i]:
+                    i+=1
+                    j=0
+                    #print(lines[i])
+                    while j<len(unknown_signatures):
+                        alts_unknown.append(lines[i])
+                        i+=1
+                        j+=1
+            except:
+                print("Error in Genomic Findings " +pdf)   
+
+    #Now create a dictionary in order to produce and excel file: 
+    # print(genenomic_findings, alts_findings)
+    # print(genomic_signatures,alts_signatures)
+    # print(unknown_signatures,alts_unknown )
+    
+    #For genenomic_findings
+    for gene in genenomic_findings:
+        custData[gene] = "" #initialize a blank string to add to
+    for gene, alt in zip(genenomic_findings, alts_findings):
+        custData[gene] = custData[gene] + ";" + alt
+        custData[gene] = custData[gene].strip(";")
+        
+    # #For genomic_signatures
+    for gene in genomic_signatures:
+        custData[gene] = "" #initialize a blank string to add to
+    for gene, alt in zip(genomic_signatures, alts_signatures):
+        custData[gene] = custData[gene] + ";" + alt
+        custData[gene] = custData[gene].strip(";")
+
+    # #For unknown_signatures
+    for gene in unknown_signatures:
+        custData[gene] = "" #initialize a blank string to add to
+    for gene, alt in zip(unknown_signatures, alts_unknown):
+        custData[gene] = custData[gene] + ";" + alt
+        custData[gene] = custData[gene].strip(";")
+
+    # print(custData)
+    return custData
+                
+                
 def fundation_one_generator(dicts_fundation_one):
     """
     Create a excel file with the data extracted previously. 

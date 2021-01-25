@@ -25,7 +25,7 @@ if __name__ == '__main__':
     dicts_Unknown=[]
     for pdf in pdfs:
         string = convert_pdf_to_txt(pdf)
-        type_of_Partner=detect_type_of_file(string)
+        type_of_Partner=detect_type_of_file(string, pdf)
         #print(string)
         #print("NOMBRE DEL PDF: "+ pdf +"\n"+string)
         custData=detectData(string,type_of_Partner,pdf)
@@ -43,4 +43,4 @@ if __name__ == '__main__':
 
 # Detect what type of chip we have: 
 
-    #fundation_one_generator(dicts_fundation_one)
+    # fundation_one_generator(dicts_fundation_one)

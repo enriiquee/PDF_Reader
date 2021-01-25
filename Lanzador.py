@@ -45,7 +45,7 @@ def tkinter_GUI():
             #print("NOMBRE DEL PDF: "+ pdf +"\n"+string)
             my_progressbar['value']+=value_progress_increasse
             root.update_idletasks
-            type_of_Partner=detect_type_of_file(string)
+            type_of_Partner=detect_type_of_file(string, pdf)
             custData=detectData(string,type_of_Partner,pdf)
             dicts_fundation_one.append(custData)
 
