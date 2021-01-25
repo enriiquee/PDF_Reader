@@ -11,6 +11,7 @@ import glob2
 def tkinter_GUI():
     root = Tk()
 
+    
     root.columnconfigure(0, weight=0)
     root.columnconfigure(1, weight=1)
     root.rowconfigure(3, weight=1)

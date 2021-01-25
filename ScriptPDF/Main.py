@@ -43,4 +43,4 @@ if __name__ == '__main__':
 
 # Detect what type of chip we have: 
 
-    # fundation_one_generator(dicts_fundation_one)
+    fundation_one_generator(dicts_fundation_one)
