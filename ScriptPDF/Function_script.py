@@ -119,7 +119,7 @@ def detectData_Clovis(string, pdf):
 
     if 'Test Type FoundationOne Liquid' in lines or 'Test Type FoundationOne' in lines:
         if 'GENOMIC FINDINGS' in lines:
-            #print("Naranja")
+            print("Naranja")
             
             #target_ibdex = lines.index('Result')
             #lines=lines[:target_ibdex+1]
@@ -190,7 +190,7 @@ def detectData_Clovis(string, pdf):
                     except:
                         print("Error in Genomic Findings " + pdf)
 
-               #Biomarker
+                #Biomarker
                 elif 'GENOMIC SIGNATURES' in lines[i] and first_iter:
                     first_iter=False
                     try:
@@ -200,7 +200,7 @@ def detectData_Clovis(string, pdf):
                         while 'Result' not in lines[i]:
                             if 'Not Evaluable' in lines[i]:
                                 genomic_signatures.append(lines[i][:-14])
-                                genomic_signatures.append(lines[i][-13:])
+                                alts_signatures.append(lines[i][-13:])
                                 i+=1
                             else:
  
@@ -243,9 +243,9 @@ def detectData_Clovis(string, pdf):
  
         
             #Now create a dictionary in order to produce and excel file: 
-            #print(genenomic_findings, alts_findings)
-            #print(genomic_signatures,alts_signatures)
-            #print(unknown_signatures,alts_unknown )
+            # print(genenomic_findings, alts_findings)
+            # print(genomic_signatures,alts_signatures)
+            # print(unknown_signatures,alts_unknown )
             
             #For genenomic_findings
             for gene in genenomic_findings:
@@ -349,7 +349,7 @@ def detectData_Clovis(string, pdf):
         custData['Date_of_Birth']='Not applicable'
         custData['FMI_Test']='Not applicable'
         for i in range(len(lines)):
-            #print(lines[i])
+            # print(lines[i])
             if 'FMI Test Order' in lines[i]:
                 custData['FMI_Test'] = lines[i][12:]
             elif 'PARTNER SUBJECT ID' in lines[i]:
@@ -421,6 +421,8 @@ def detectData_Clovis(string, pdf):
                             genomic_signatures.append(lines[i][:-14])
                             genomic_signatures.append(lines[i][-13:])
                             i+=1
+                        elif 'No reportable variants' in lines[i]:
+                            break
                         else:
                             genomic_signatures.append(lines[i])
                             i+=1
@@ -665,7 +667,7 @@ def detectData_Pfizer(string, pdf):
             #target_ibdex = lines.index('Result')
             #lines=lines[:target_ibdex+1]
         for i in range(len(lines)):
-            print(lines[i])
+            # print(lines[i])
             if 'FMI Test Order' in lines[i]:
                 if 'FMI_Test' not in custData:
                     custData['FMI_Test'] = lines[i+1]
@@ -809,9 +811,9 @@ def detectData_Pfizer(string, pdf):
             custData[gene] = custData[gene] + ";" + alt
             custData[gene] = custData[gene].strip(";") 
         
-        print(genenomic_findings, alts_findings)   
-        print(genomic_signatures, alts_signatures) 
-        print(unknown_signatures, alts_unknown) 
+        # print(genenomic_findings, alts_findings)   
+        # print(genomic_signatures, alts_signatures) 
+        # print(unknown_signatures, alts_unknown) 
         
         return custData
 
@@ -1314,11 +1316,18 @@ def fundation_one_generator(dicts_fundation_one):
     :output: excel file. 
     """
     #Elements of foundation: 
-    foundation_one = ['File','FMI_Test', 'Subjet', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis',"ABL1","ACVR1B","AKT1","AKT2","AKT3","ALK","ALOX12B","AMER1", "APC","AR","ARAF","ARFRP1","ARID1A","ASXL1","ATM","ATR","ATRX","AURKA","AURKB","AXIN1","AXL","BAP1","BARD1","BCL2","BCL2L1","BCL2L2","BCL6","BCOR","BCORL1","BRAF","BRCA1","BRCA2","BRD4","BRIP1","BTG1","BTG2","BTK","C11orf30","CALR","CARD11","CASP8","CBFB","CBL","CCND1","CCND2","CCND3","CCNE1","CD22","CD274","CD70","CD79A","CD79B","CDC73","CDH1","CDK12","CDK4","CDK6","CDK8","CDKN1A","CDKN1B","CDKN2A","CDKN2B","CDKN2C","CEBPA","CHEK1","CHEK2","CIC","CREBBP","CRKL","CSF1R","CSF3R","CTCF","CTNNA1","CTNNB1","CUL3","CUL4A","CXCR4","CYP17A1","DAXX","DDR1","DDR2","DIS3","DNMT3A","DOT1L","EED","EGFR","EP300","EPHA3","EPHB1","EPHB4","ERBB2","ERBB3","ERBB4","ERCC4","ERG","ERRFI1","ESR1","EZH2","FAM46C","FANCA","FANCC","FANCG","FANCL","FAS","FBXW7","FGF10","FGF12","FGF14","FGF19","FGF23","FGF3","FGF4","FGF6","FGFR1","FGFR2","FGFR3","FGFR4","FH","FLCN","FLT1","FLT3","FOXL2","FUBP1","GABRA6","GATA3","GATA4","GATA6","GID4","GNA11","GNA13","GNAQ","GNAS","GRM3","GSK3B","H3F3A","HDAC1","HGF","HNF1A","HRAS","HSD3B1","ID3","IDH1","IDH2","IGF1R","IKBKE","IKZF1","INPP4B","IRF2","IRF4","IRS2","JAK1","JAK2","JAK3","JUN","KDM5A","KDM5C","KDM6A","KDR","KEAP1","KEL","KIT","KLHL6","KMT2A","KMT2D","KRAS","LTK","LYN","MAF","MAP2K1","MAP2K2","MAP2K4","MAP3K1","MAP3K13","MAPK1","MCL1","MDM2","MDM4","MED12","MEF2B","MEN1","MERTK","MET","MITF","MKNK1","MLH1","MPL","MRE11A","MSH2","MSH3","MSH6","MST1R","MTAP","MTOR","MUTYH","MYC","MYCL","MYCN","MYD88","NBN","NF1","NF2","NFE2L2","NFKBIA","NKX2-1","NOTCH1","NOTCH2","NOTCH3","NPM1","NRAS","NT5C2","NTRK1","NTRK2","NTRK3","P2RY8","PALB2","PARK2","PARP1","PARP2","PARP3","PAX5","PBRM1","PDCD1","PDCD1LG2","PDGFRA","PDGFRB","PDK1","PIK3C2B","PIK3C2G","PIK3CA","PIK3CB","PIK3R1","PIM1","PMS2","POLD1","POLE","PPARG","PPP2R1A","PPP2R2A","PRDM1","PRKAR1A","PRKCI","PTCH1","PTEN","PTPN11","PTPRO","QKI","RAC1","RAD21","RAD51","RAD51B","RAD51C","RAD51D","RAD52","RAD54L","RAF1","RARA","RB1","RBM10","REL","RET","RICTOR","RNF43","ROS1","RPTOR","SDHA","SDHB","SDHC","SDHD","SETD2","SF3B1","SGK1","SMAD2","SMAD4","SMARCA4","SMARCB1","SMO","SNCAIP","SOCS1","SOX2","SOX9","SPEN","SPOP","SRC","STAG2","STAT3","STK11","SUFU","SYK","TBX3","TEK","TET2","TGFBR2","TIPARP","TNFAIP3","TNFRSF14","TP53","TSC1","TSC2","TYRO3","U2AF1","VEGFA","VHL","WHSC1","WHSC1L1","WT1","XPO1","XRCC2","ZNF217","ZNF703"]
+    foundation_one = ['File','FMI_Test', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis',"ABL1","ACVR1B","AKT1","AKT2","AKT3","ALK","ALOX12B","AMER1", "APC","AR","ARAF","ARFRP1","ARID1A","ASXL1","ATM","ATR","ATRX","AURKA","AURKB","AXIN1","AXL","BAP1","BARD1","BCL2","BCL2L1","BCL2L2","BCL6","BCOR","BCORL1","BRAF","BRCA1","BRCA2","BRD4","BRIP1","BTG1","BTG2","BTK","C11orf30","CALR","CARD11","CASP8","CBFB","CBL","CCND1","CCND2","CCND3","CCNE1","CD22","CD274","CD70","CD79A","CD79B","CDC73","CDH1","CDK12","CDK4","CDK6","CDK8","CDKN1A","CDKN1B","CDKN2A","CDKN2B","CDKN2C","CEBPA","CHEK1","CHEK2","CIC","CREBBP","CRKL","CSF1R","CSF3R","CTCF","CTNNA1","CTNNB1","CUL3","CUL4A","CXCR4","CYP17A1","DAXX","DDR1","DDR2","DIS3","DNMT3A","DOT1L","EED","EGFR","EP300","EPHA3","EPHB1","EPHB4","ERBB2","ERBB3","ERBB4","ERCC4","ERG","ERRFI1","ESR1","EZH2","FAM46C","FANCA","FANCC","FANCG","FANCL","FAS","FBXW7","FGF10","FGF12","FGF14","FGF19","FGF23","FGF3","FGF4","FGF6","FGFR1","FGFR2","FGFR3","FGFR4","FH","FLCN","FLT1","FLT3","FOXL2","FUBP1","GABRA6","GATA3","GATA4","GATA6","GID4","GNA11","GNA13","GNAQ","GNAS","GRM3","GSK3B","H3F3A","HDAC1","HGF","HNF1A","HRAS","HSD3B1","ID3","IDH1","IDH2","IGF1R","IKBKE","IKZF1","INPP4B","IRF2","IRF4","IRS2","JAK1","JAK2","JAK3","JUN","KDM5A","KDM5C","KDM6A","KDR","KEAP1","KEL","KIT","KLHL6","KMT2A","KMT2D","KRAS","LTK","LYN","MAF","MAP2K1","MAP2K2","MAP2K4","MAP3K1","MAP3K13","MAPK1","MCL1","MDM2","MDM4","MED12","MEF2B","MEN1","MERTK","MET","MITF","MKNK1","MLH1","MPL","MRE11A","MSH2","MSH3","MSH6","MST1R","MTAP","MTOR","MUTYH","MYC","MYCL","MYCN","MYD88","NBN","NF1","NF2","NFE2L2","NFKBIA","NKX2-1","NOTCH1","NOTCH2","NOTCH3","NPM1","NRAS","NT5C2","NTRK1","NTRK2","NTRK3","P2RY8","PALB2","PARK2","PARP1","PARP2","PARP3","PAX5","PBRM1","PDCD1","PDCD1LG2","PDGFRA","PDGFRB","PDK1","PIK3C2B","PIK3C2G","PIK3CA","PIK3CB","PIK3R1","PIM1","PMS2","POLD1","POLE","PPARG","PPP2R1A","PPP2R2A","PRDM1","PRKAR1A","PRKCI","PTCH1","PTEN","PTPN11","PTPRO","QKI","RAC1","RAD21","RAD51","RAD51B","RAD51C","RAD51D","RAD52","RAD54L","RAF1","RARA","RB1","RBM10","REL","RET","RICTOR","RNF43","ROS1","RPTOR","SDHA","SDHB","SDHC","SDHD","SETD2","SF3B1","SGK1","SMAD2","SMAD4","SMARCA4","SMARCB1","SMO","SNCAIP","SOCS1","SOX2","SOX9","SPEN","SPOP","SRC","STAG2","STAT3","STK11","SUFU","SYK","TBX3","TEK","TET2","TGFBR2","TIPARP","TNFAIP3","TNFRSF14","TP53","TSC1","TSC2","TYRO3","U2AF1","VEGFA","VHL","WHSC1","WHSC1L1","WT1","XPO1","XRCC2","ZNF217","ZNF703"]
     df = pd.DataFrame(data=None, columns=foundation_one, dtype=None, copy=False)
 
     for d in dicts_fundation_one:
         df = df.append(d, ignore_index=True).fillna(0)
+    #Eliminamos las columnas que no nos interesan. 
+
+    df.drop(['Partner_Study','Subjet', 'Site_ID', 'Specimen_ID'], axis = 1) 
+        # del df['Partner_Study, Site_ID,	Specimen_ID,Subjet']
+
+    
+    
     print(df)
     df.to_excel (r'Foundation_One_dataframe.xlsx', index = True, header=True)
     print(os.getcwd)
