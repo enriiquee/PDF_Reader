@@ -7,8 +7,8 @@ if __name__ == '__main__':
     
     #path of folder containing several PDFs
     
-    path = r'/Users/enriq/Dropbox/Lector_adobe/PDF/' 
-    #path= r'/Users/pax-32/Dropbox/Lector_adobe/PDF/'
+    # path = r'/Users/enriq/Dropbox/Lector_adobe/PDF/' 
+    path= r'/Users/pax-32/Dropbox/Lector_adobe/PDF/'
     #path = r'/home/eperez/Documents/PDF_Reader/PDF'
     #Change directory
     os.chdir(path)
@@ -43,4 +43,4 @@ if __name__ == '__main__':
 
 # Detect what type of chip we have: 
 
-    fundation_one_generator(dicts_fundation_one)
+    # fundation_one_generator(dicts_fundation_one)

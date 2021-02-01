@@ -50,7 +50,7 @@ def detect_type_of_file(string, pdf):
                 elif 'Clovis Oncology' in lines[i] or 'CLOVIS ONCOLOGY' in lines[i]:
                     type_of_file='Clovis Oncology'
                     return type_of_file
-                elif 'Roche Pharma' or 'Roche' in lines[i]:
+                elif 'Roche Pharma' in lines[i] or 'Roche' in lines[i]:
                     type_of_file='Roche Pharma'
                     return type_of_file
                 elif 'BRISTOL-MYERS' in lines[i]:
