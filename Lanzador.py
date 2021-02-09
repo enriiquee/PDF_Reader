@@ -6,6 +6,11 @@ from tkinter import messagebox
 from ScriptPDF.Function_script import *
 import glob2
 
+"""
+This launcher allows the execution of the virtual environment to run the script. 
+
+"""
+
 
 #Start tkinter gui function
 def tkinter_GUI():

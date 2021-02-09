@@ -6,6 +6,10 @@ from pdfminer.layout import LAParams
 from pdfminer.pdfpage import PDFPage
 from six import StringIO
 
+"""
+This script contains the functions that we are going to use to perform the different tasks (Convert pdf to text, detect the type of file we have, detect the type of data and the functions that correspond to each type of 
+pdf. )
+"""
 
     
 def convert_pdf_to_txt(path):
@@ -1514,34 +1518,3 @@ def fundation_one_generator(dicts_fundation_one):
     df.to_excel (r'Foundation_One_dataframe.xlsx', index = True, header=True)
     print(os.getcwd)
 
-
-
-
-#path=r'C:/Users/enriq/Dropbox/Lector_adobe/PDF/'
-
-#Change directory
-#os.chdir(path)
-# #Create a list with the pdf files. 
-# pdfs = []
-# for file in glob.glob("*.pdf"):
-#     pdfs.append(file)
-# #print (pdfs)
-
-# #Create a list where we are going to save our dictionaries generated. 
-# dicts_fundation_one=[]
-# for pdf in pdfs:
-#     string = convert_pdf_to_txt(pdf)
-#     #print(string)
-#     #print("NOMBRE DEL PDF: "+ pdf +"\n"+string)
-#     print(detect_type_of_file(string))
-        
-
-
-# path = r'/Users/pax-32/Dropbox/Lector_adobe/PDF/tumor.pdf'
-# path=r'C:/Users/enriq/Dropbox/Lector_adobe/PDF/ORD-0900636-01.pdf'
-
-# string=convert_pdf_to_txt(path)
-# test=detect_type_of_file(string)
-
-# custData=detectData(string,test)
-# print(custData)

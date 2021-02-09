@@ -1,10 +1,12 @@
 import glob2, os
 from Function_script import *
 
+"""
+This script allow us to detect what type of data we have. This is only a tester, so doesn't run in the main script. 
+"""
 
-
-    #path of folder containing several PDFs
-    #path=r'C:/Users/enriq/Dropbox/Lector_adobe/PDF/'  
+#path of folder containing several PDFs
+#path=r'C:/Users/enriq/Dropbox/Lector_adobe/PDF/'  
 path=r'C:/Users/enriq/Dropbox/Doctorado/PFIS-WB/PDFs Foundation Piloto de prueba/FOUNDATION PILOTAJE DE IMPORTACION'  
 #Change directory
 os.chdir(path)

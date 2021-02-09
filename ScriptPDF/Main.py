@@ -2,6 +2,12 @@
 from Function_script import *
 import glob2
 
+"""
+This script allows us to execute the functions without starting the virtual environment. It is mostly used for testing. 
+Remember to change the path in order to run. 
+"""
+
+
 #Start script
 if __name__ == '__main__':
     
