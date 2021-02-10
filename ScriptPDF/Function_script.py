@@ -9,6 +9,7 @@ from six import StringIO
 """
 This script contains the functions that we are going to use to perform the different tasks (Convert pdf to text, detect the type of file we have, detect the type of data and the functions that correspond to each type of 
 pdf. )
+
 """
 
     
@@ -122,8 +123,16 @@ def detectData_Clovis(string, pdf):
     #We do the classification between the two types of files that we have with foundationOne Liquid
 
     if 'Test Type FoundationOne Liquid' in lines or 'Test Type FoundationOne' in lines:
-        if 'GENOMIC FINDINGS' in lines:
+        
+        if 'Test Type FoundationOne Liquid' in lines:
+            custData['TypeOftest']='CTA Liquid'
+        elif 'Test Type FoundationOne' in lines:
+            custData['TypeOftest']='T7_315_28'
+
+            
+        if 'GENOMIC FINDINGS' in lines:  
             print("Clovis Naranja")
+            custData['TypeOftest']='CTA Liquid'
             
             #target_ibdex = lines.index('Result')
             #lines=lines[:target_ibdex+1]
@@ -277,6 +286,8 @@ def detectData_Clovis(string, pdf):
         
         elif 'STUDY-RELATED DELETERIOUS ALTERATION(S)' in lines:
             print('Blanco/Negro')
+            custData['TypeOftest']='T7-395'
+
             for i in range(len(lines)):
                 # print(lines[i])
                 if 'FMI Test Order #' in lines[i]:
@@ -349,6 +360,7 @@ def detectData_Clovis(string, pdf):
     else:
         print('Clovis ')
         first_iter=True
+        custData['TypeOftest']='CF3'
         custData['Test_Type']='Foundation Medicine'
         custData['Visit_Type']='Not applicable'
         custData['Date_of_Birth']='Not applicable'
@@ -519,11 +531,13 @@ def detectData_Pfizer(string, pdf):
     unknown_signatures, alts_unknown = [], []
     custData['File']=pdf
 
+
     #print(lines)
 
     #Vemos que tipo de FoundationOne es:
     if 'Test Type FoundationOne Liquid AB1' in lines:
         print("Pfizer Liquido")
+        custData['TypeOftest']='CTA_Liquid_AB1'
         for i in range(len(lines)):
             # print(lines[i])
             if 'FMI Test Order' in lines[i]:
@@ -597,6 +611,7 @@ def detectData_Pfizer(string, pdf):
     #Comprobamos que sea SOLID
     elif 'Test Type FoundationOne DX1 (SOLID)' in lines:
         print("Pfizer Solid")
+        custData['TypeOftest']='CTA_Solid'
         for i in range(len(lines)):
             # print(lines[i])
             if 'FMI Test Order' in lines[i]:
@@ -664,7 +679,7 @@ def detectData_Pfizer(string, pdf):
 
     elif 'Test Type FoundationOne DX1' in lines:
         print('Pfizer FoundationOne DX1 solo')
-
+        custData['TypeOftest']='CTA_Solid'
         if 'GENOMIC FINDINGS' in lines:
             first_iter=True
             # print("Naranja")
@@ -825,10 +840,12 @@ def detectData_Pfizer(string, pdf):
     else:
         print('Pfizer')
         first_iter=True
+        custData['TypeOftest']='DX1'
         custData['Test_Type']='Foundation Medicine'
         custData['Visit_Type']='Not applicable'
         custData['Date_of_Birth']='Not applicable'
         custData['FMI_Test']='Not applicable'
+        
         for i in range(len(lines)):
             # print(lines[i])
             if 'FMI SAMPLE ID' in lines[i]:
@@ -995,6 +1012,7 @@ def detectData_Roche(string, pdf):
     custData['File']=pdf    
     
     if 'Test Type FoundationOne DX1' in lines:
+        custData['TypeOftest']='CTA_SOLID'
         print('Roche FoundationOne DX1')
         for i in range(len(lines)):
             #print(lines[i])
@@ -1154,6 +1172,7 @@ def detectData_Roche(string, pdf):
         return custData
     
     else:
+        custData['TypeOftest']='DX1'
         custData['Test_Type']='Foundation Medicine'
         custData['Visit_Type']='Not applicable'
         custData['FMI_Test']='Not applicable'
@@ -1328,7 +1347,6 @@ def detectData_Roche(string, pdf):
         #print(custData)
         return custData
 
-
 def detectData_Bristol(string,pdf):
 
     """
@@ -1346,8 +1364,9 @@ def detectData_Bristol(string,pdf):
     custData['File']=pdf
 
     #We do the classification between the two types of files that we have with foundationOne Liquid
-    print('Bristol')
+    print('Bristol'+pdf)
     first_iter=True
+    custData['TypeOftest']='CF3'
     custData['Test_Type']='Foundation Medicine'
     custData['Visit_Type']='Not applicable'
     custData['FMI_Test']='Not applicable'
@@ -1493,14 +1512,35 @@ def detectData_Bristol(string,pdf):
     # print(custData)
     return custData
                                
-def fundation_one_generator(dicts_fundation_one): 
+def fundation_one_generator(dicts_fundation_one, type_of_Partner): 
     """
     Create a excel file with the data extracted previously. 
     :input: Dictionary with the data
     :output: excel file. 
     """
     #Elements of foundation: 
-    foundation_one = ['File','FMI_Test', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis',"ABL1","ACVR1B","AKT1","AKT2","AKT3","ALK","ALOX12B","AMER1", "APC","AR","ARAF","ARFRP1","ARID1A","ASXL1","ATM","ATR","ATRX","AURKA","AURKB","AXIN1","AXL","BAP1","BARD1","BCL2","BCL2L1","BCL2L2","BCL6","BCOR","BCORL1","BRAF","BRCA1","BRCA2","BRD4","BRIP1","BTG1","BTG2","BTK","C11orf30","CALR","CARD11","CASP8","CBFB","CBL","CCND1","CCND2","CCND3","CCNE1","CD22","CD274","CD70","CD79A","CD79B","CDC73","CDH1","CDK12","CDK4","CDK6","CDK8","CDKN1A","CDKN1B","CDKN2A","CDKN2B","CDKN2C","CEBPA","CHEK1","CHEK2","CIC","CREBBP","CRKL","CSF1R","CSF3R","CTCF","CTNNA1","CTNNB1","CUL3","CUL4A","CXCR4","CYP17A1","DAXX","DDR1","DDR2","DIS3","DNMT3A","DOT1L","EED","EGFR","EP300","EPHA3","EPHB1","EPHB4","ERBB2","ERBB3","ERBB4","ERCC4","ERG","ERRFI1","ESR1","EZH2","FAM46C","FANCA","FANCC","FANCG","FANCL","FAS","FBXW7","FGF10","FGF12","FGF14","FGF19","FGF23","FGF3","FGF4","FGF6","FGFR1","FGFR2","FGFR3","FGFR4","FH","FLCN","FLT1","FLT3","FOXL2","FUBP1","GABRA6","GATA3","GATA4","GATA6","GID4","GNA11","GNA13","GNAQ","GNAS","GRM3","GSK3B","H3F3A","HDAC1","HGF","HNF1A","HRAS","HSD3B1","ID3","IDH1","IDH2","IGF1R","IKBKE","IKZF1","INPP4B","IRF2","IRF4","IRS2","JAK1","JAK2","JAK3","JUN","KDM5A","KDM5C","KDM6A","KDR","KEAP1","KEL","KIT","KLHL6","KMT2A","KMT2D","KRAS","LTK","LYN","MAF","MAP2K1","MAP2K2","MAP2K4","MAP3K1","MAP3K13","MAPK1","MCL1","MDM2","MDM4","MED12","MEF2B","MEN1","MERTK","MET","MITF","MKNK1","MLH1","MPL","MRE11A","MSH2","MSH3","MSH6","MST1R","MTAP","MTOR","MUTYH","MYC","MYCL","MYCN","MYD88","NBN","NF1","NF2","NFE2L2","NFKBIA","NKX2-1","NOTCH1","NOTCH2","NOTCH3","NPM1","NRAS","NT5C2","NTRK1","NTRK2","NTRK3","P2RY8","PALB2","PARK2","PARP1","PARP2","PARP3","PAX5","PBRM1","PDCD1","PDCD1LG2","PDGFRA","PDGFRB","PDK1","PIK3C2B","PIK3C2G","PIK3CA","PIK3CB","PIK3R1","PIM1","PMS2","POLD1","POLE","PPARG","PPP2R1A","PPP2R2A","PRDM1","PRKAR1A","PRKCI","PTCH1","PTEN","PTPN11","PTPRO","QKI","RAC1","RAD21","RAD51","RAD51B","RAD51C","RAD51D","RAD52","RAD54L","RAF1","RARA","RB1","RBM10","REL","RET","RICTOR","RNF43","ROS1","RPTOR","SDHA","SDHB","SDHC","SDHD","SETD2","SF3B1","SGK1","SMAD2","SMAD4","SMARCA4","SMARCB1","SMO","SNCAIP","SOCS1","SOX2","SOX9","SPEN","SPOP","SRC","STAG2","STAT3","STK11","SUFU","SYK","TBX3","TEK","TET2","TGFBR2","TIPARP","TNFAIP3","TNFRSF14","TP53","TSC1","TSC2","TYRO3","U2AF1","VEGFA","VHL","WHSC1","WHSC1L1","WT1","XPO1","XRCC2","ZNF217","ZNF703"]
+    
+    information_main_list=[]
+    
+    foundation_one=['File','TypeOftest','FMI_Test', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis',"ABL1","ACVR1B","AKT1","AKT2","AKT3","ALK","ALOX12B","AMER1","APC","AR","ARAF","ARFRP1","ARID1A","ASXL1","ATM","ATR","ATRX","AURKA","AURKB","AXIN1","AXL","BAP1","BARD1","BCL2","BCL2L1","BCL2L2","BCL6","BCOR","BCORL1","BRAF","BRCA1","BRCA2","BRD4","BRIP1","BTG1","BTG2","BTK","C11orf30","CALR","CARD11","CASP8","CBFB","CBL","CCND1","CCND2","CCND3","CCNE1","CD22","CD274","CD70","CD79A","CD79B","CDC73","CDH1","CDK12","CDK4","CDK6","CDK8","CDKN1A","CDKN1B","CDKN2A","CDKN2B","CDKN2C","CEBPA","CHEK1","CHEK2","CIC","CREBBP","CRKL","CSF1R","CSF3R","CTCF","CTNNA1","CTNNB1","CUL3","CUL4A","CXCR4","CYP17A1","DAXX","DDR1","DDR2","DIS3","DNMT3A","DOT1L","EED","EGFR","EP300","EPHA3","EPHB1","EPHB4","ERBB2","ERBB3","ERBB4","ERCC4","ERG","ERRFI1","ESR1","EZH2","FAM46C","FANCA","FANCC","FANCG","FANCL","FAS","FBXW7","FGF10","FGF12","FGF14","FGF19","FGF23","FGF3","FGF4","FGF6","FGFR1","FGFR2","FGFR3","FGFR4","FH","FLCN","FLT1","FLT3","FOXL2","FUBP1","GABRA6","GATA3","GATA4","GATA6","GID4","GNA11","GNA13","GNAQ","GNAS","GRM3","GSK3B","H3F3A","HDAC1","HGF","HNF1A","HRAS","HSD3B1","ID3","IDH1","IDH2","IGF1R","IKBKE","IKZF1","INPP4B","IRF2","IRF4","IRS2","JAK1","JAK2","JAK3","JUN","KDM5A","KDM5C","KDM6A","KDR","KEAP1","KEL","KIT","KLHL6","KMT2A","KMT2D","KRAS","LTK","LYN","MAF","MAP2K1","MAP2K2","MAP2K4","MAP3K1","MAP3K13","MAPK1","MCL1","MDM2","MDM4","MED12","MEF2B","MEN1","MERTK","MET","MITF","MKNK1","MLH1","MPL","MRE11A","MSH2","MSH3","MSH6","MST1R","MTAP","MTOR","MUTYH","MYC","MYCL","MYCN","MYD88","NBN","NF1","NF2","NFE2L2","NFKBIA","NKX2-1","NOTCH1","NOTCH2","NOTCH3","NPM1","NRAS","NT5C2","NTRK1","NTRK2","NTRK3","P2RY8","PALB2","PARK2","PARP1","PARP2","PARP3","PAX5","PBRM1","PDCD1","PDCD1LG2","PDGFRA","PDGFRB","PDK1","PIK3C2B","PIK3C2G","PIK3CA","PIK3CB","PIK3R1","PIM1","PMS2","POLD1","POLE","PPARG","PPP2R1A","PPP2R2A","PRDM1","PRKAR1A","PRKCI","PTCH1","PTEN","PTPN11","PTPRO","QKI","RAC1","RAD21","RAD51","RAD51B","RAD51C","RAD51D","RAD52","RAD54L","RAF1","RARA","RB1","RBM10","REL","RET","RICTOR","RNF43","ROS1","RPTOR","SDHA","SDHB","SDHC","SDHD","SETD2","SF3B1","SGK1","SMAD2","SMAD4","SMARCA4","SMARCB1","SMO","SNCAIP","SOCS1","SOX2","SOX9","SPEN","SPOP","SRC","STAG2","STAT3","STK11","SUFU","SYK","TBX3","TEK","TET2","TGFBR2","TIPARP","TNFAIP3","TNFRSF14","TP53","TSC1","TSC2","TYRO3","U2AF1","VEGFA","VHL","WHSC1","WHSC1L1","WT1","XPO1","XRCC2","ZNF217","ZNF703","BCR","CD74","ETV4","ETV5","ETV6","EWSR1","EZR","MYB","NUTM1","RSPO2","SDC4","SLC34A2","TERC","TERT","TMPRSS2","Loss of Heterozygosity score","Tumor Mutational Burden Score","Tumor Mutational Burden","Microsatellite (MS) status","Microsatellite Instability Status","Microsatellite Instability"]
+    
+    CTA_Solid=['File','TypeOftest','FMI_Test', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis',"ABL1","ACVR1B","AKT1","AKT2","AKT3","ALK","ALOX12B","AMER1","APC","AR","ARAF","ARFRP1","ARID1A","ASXL1","ATM","ATR","ATRX","AURKA","AURKB","AXIN1","AXL","BAP1","BARD1","BCL2","BCL2L1","BCL2L2","BCL6","BCOR","BCORL1","BRAF","BRCA1","BRCA2","BRD4","BRIP1","BTG1","BTG2","BTK","C11orf30","CALR","CARD11","CASP8","CBFB","CBL","CCND1","CCND2","CCND3","CCNE1","CD22","CD274","CD70","CD79A","CD79B","CDC73","CDH1","CDK12","CDK4","CDK6","CDK8","CDKN1A","CDKN1B","CDKN2A","CDKN2B","CDKN2C","CEBPA","CHEK1","CHEK2","CIC","CREBBP","CRKL","CSF1R","CSF3R","CTCF","CTNNA1","CTNNB1","CUL3","CUL4A","CXCR4","CYP17A1","DAXX","DDR1","DDR2","DIS3","DNMT3A","DOT1L","EED","EGFR","EP300","EPHA3","EPHB1","EPHB4","ERBB2","ERBB3","ERBB4","ERCC4","ERG","ERRFI1","ESR1","EZH2","FAM46C","FANCA","FANCC","FANCG","FANCL","FAS","FBXW7","FGF10","FGF12","FGF14","FGF19","FGF23","FGF3","FGF4","FGF6","FGFR1","FGFR2","FGFR3","FGFR4","FH","FLCN","FLT1","FLT3","FOXL2","FUBP1","GABRA6","GATA3","GATA4","GATA6","GID4","GNA11","GNA13","GNAQ","GNAS","GRM3","GSK3B","H3F3A","HDAC1","HGF","HNF1A","HRAS","HSD3B1","ID3","IDH1","IDH2","IGF1R","IKBKE","IKZF1","INPP4B","IRF2","IRF4","IRS2","JAK1","JAK2","JAK3","JUN","KDM5A","KDM5C","KDM6A","KDR","KEAP1","KEL","KIT","KLHL6","KMT2A","KMT2D","KRAS","LTK","LYN","MAF","MAP2K1","MAP2K2","MAP2K4","MAP3K1","MAP3K13","MAPK1","MCL1","MDM2","MDM4","MED12","MEF2B","MEN1","MERTK","MET","MITF","MKNK1","MLH1","MPL","MRE11A","MSH2","MSH3","MSH6","MST1R","MTAP","MTOR","MUTYH","MYC","MYCL","MYCN","MYD88","NBN","NF1","NF2","NFE2L2","NFKBIA","NKX2-1","NOTCH1","NOTCH2","NOTCH3","NPM1","NRAS","NT5C2","NTRK1","NTRK2","NTRK3","P2RY8","PALB2","PARK2","PARP1","PARP2","PARP3","PAX5","PBRM1","PDCD1","PDCD1LG2","PDGFRA","PDGFRB","PDK1","PIK3C2B","PIK3C2G","PIK3CA","PIK3CB","PIK3R1","PIM1","PMS2","POLD1","POLE","PPARG","PPP2R1A","PPP2R2A","PRDM1","PRKAR1A","PRKCI","PTCH1","PTEN","PTPN11","PTPRO","QKI","RAC1","RAD21","RAD51","RAD51B","RAD51C","RAD51D","RAD52","RAD54L","RAF1","RARA","RB1","RBM10","REL","RET","RICTOR","RNF43","ROS1","RPTOR","SDHA","SDHB","SDHC","SDHD","SETD2","SF3B1","SGK1","SMAD2","SMAD4","SMARCA4","SMARCB1","SMO","SNCAIP","SOCS1","SOX2","SOX9","SPEN","SPOP","SRC","STAG2","STAT3","STK11","SUFU","SYK","TBX3","TEK","TET2","TGFBR2","TIPARP","TNFAIP3","TNFRSF14","TP53","TSC1","TSC2","TYRO3","U2AF1","VEGFA","VHL","WHSC1","WHSC1L1","WT1","XPO1","XRCC2","ZNF217","ZNF703","BCR","CD74","ETV4","ETV5","ETV6","EWSR1","EZR","MYB","NUTM1","RSPO2","SDC4","SLC34A2","TERC","TERT","TMPRSS2","Loss of Heterozygosity score","Tumor Mutational Burden Score","Tumor Mutational Burden","Microsatellite (MS) status","Microsatellite Instability Status","Microsatellite Instability"]
+    
+    DX1=['File','TypeOftest','FMI_Test', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis',"ABL1","ALK","ARFRP1","ATRX","BAP1","BCL6","BRCA1","BTG2","CASP8","CCND3","CD74","CDK12","CDKN1B","CHEK1","CSF1R","CUL3","DDR1","EED","EPHB1","ERCC4","ETV5","FAM123B","FANCL","FGF14","FGF6","FH","FUBP1","GNA11","GSK3B","HRAS","IGF1R","IRF4","JUN","KEAP1","LTK","MAP2K4","MDM2","MERTK","MLL","MSH3","MUTYH","MYD88","ACVR1B","ALOX12B","ARID1A","AURKA","BARD1","BCOR","BRCA2","BTK","CBFB","CCNE1","CD79A","CDK4","CDKN2A","CHEK2","CSF3R","CUL4A","DDR2","EGFR","EPHB4","ERG","ETV6","FAM46C","FAS","FGF19","FGFR1","FLCN","GABRA6","GNA13","H3F3A","HSD3B1","IKBKE","IRS2","KDM5A","KEL","LYN","MAP3K1","MDM4","MET","MLL2","MSH6","MYB","NBN","AKT1","APC","ASXL1","AURKB","BCL2","BCORL1","BRD4","C17orf39","CBL","CD22","CD79B","CDK6","CDKN2B","CIC","CTCF","CXCR4","DIS3","EMSY","ERBB2","ERRFI1","EWSR1","FANCA","FBXW7","FGF23","FGFR2","FLT1","GATA3","GNAQ","HDAC1","ID3","IKZF1","JAK1","KDM5C","KIT","MAF","MAP3K13","MED12","MITF","MPL","MST1R","MYC","NF1","AKT2","AR","ATM","AXIN1","BCL2L1","BCR","BRIP1","CALR","CCND1","CD274","CDC73","CDK8","CDKN2C","CREBBP","CTNNA1","CYP17A1","DNMT3A","EP300","ERBB3","ESR1","EZH2","FANCC","FGF10","FGF3","FGFR3","FLT3","GATA4","GNAS","HGF","IDH1","INPP4B","JAK2","KDM6A","KLHL6","MAP2K1","MAPK1","MEF2B","MKNK1","MRE11A","MTAP","MYCL1","NF2","AKT3","ARAF","ATR","AXL","BCL2L2","BRAF","BTG1","CARD11","CCND2","CD70","CDH1","CDKN1A","CEBPA","CRKL","CTNNB1","DAXX","DOT1L","EPHA3","ERBB4","ETV4","EZR","FANCG","FGF12","FGF4","FGFR4","FOXL2","GATA6","GRM3","HNF1A","IDH2","IRF2","JAK3","KDR","KRAS","MAP2K2","MCL1","MEN1","MLH1","MSH2","MTOR","MYCN","NFE2L2","NFKBIA","NPM1","NTRK3","PARP1","PDCD1","PIK3C2B","PIM1","PPP2R1A","PTCH1","RAC1","RAD51D","RB1","RNF43","SDHA","SF3B1","SMARCA4","SOX2","STAG2","TBX3","TGFBR2","TP53","VEGFA","XPO1","NKX2-1","NRAS","NUTM1","PARP2","PDCD1LG2","PIK3C2G","PMS2","PPP2R2A","PTEN","RAD21","RAD52","RBM10","ROS1","SDHB","SGK1","SMARCB1","SOX9","STAT3","TEK","TIPARP","TSC1","VHL","XRCC2","NOTCH1","NT5C2","P2RY8","PARP3","PDGFRA","PIK3CA","POLD1","PRDM1","PTPN11","RAD51","RAD54L","REL","RPTOR","SDHC","SLC34A2","SMO","SPEN","STK11","TERC","TMPRSS2","TSC2","WHSC1","ZNF217","NOTCH2","NTRK1","PALB2","PAX5","PDGFRB","PIK3CB","POLE","PRKAR1A","PTPRO","RAD51B","RAF1","RET","RSPO2","SDHD","SMAD2","SNCAIP","SPOP","SUFU","TERT","TNFAIP3","TYRO3","WHSC1L1","ZNF703","NOTCH3","NTRK2","PARK2","PBRM1","PDK1","PIK3R1","PPARG","PRKCI","QKI","RAD51C","RARA","RICTOR","SDC4","SETD2","SMAD4","SOCS1","SRC","SYK","TET2","TNFRSF14","U2AF1","WT1"]
+    
+    CTA_Liquid_AB1=['File','TypeOftest','FMI_Test', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis',"ABL1","AR","AURKB","BCOR","BTG2","CCND2","CDC73","CDKN2B","CSF3R","FLT1","GNA11","HNF1A","INPP4B","KDM5C","KRAS","MAPK1","MITF","MTAP","NF1","NRAS","PARP1","PDK1","POLE","PTPN11","RAD52","RNF43","SETD2","SNCAIP","STK11","TIPARP","VEGFA","SDHD","ACVR1B","ARAF","AXIN1","BCORL1","BTK","CCND3","CDH1","CDKN2C","CTCF","FLT3","GNA13","HRAS","IRF2","KDM6A","LTK","MCL1","MKNK1","MTOR","NF2","NT5C2","PARP2","PIK3C2B","PPARG","PTPRO","RAD54L","ROS1","SF3B1","SOCS1","SUFU","TMPRSS2*","VHL","ALOX12B","ATR","BCL2L1","BRD4","CBFB","CD79A","CDKN1A","CREBBP","CXCR4","GATA4","H3F3A","IGF1R","JAK3","KLHL6","MAP2K4","MEN1","MSH3","MYCN","NOTCH2","P2RY8","PDCD1LG2","PIM1","PRKCI","RAD51B","REL","SDHA","SMARCA4","SRC","TERC*","TSC2","XRCC2","AMER1","ATRX","BCL2L2","BRIP1","CBL","CD79B","CDKN1B","CRKL","CYP17A1","GATA6","HDAC1","IKBKE","JUN","KMT2A","MAP3K1","MERTK","MSH6","MYD88","NOTCH3","PALB2","PDGFRA","PMS2","PTCH1","RAD51C","RET","SDHB","SMARCB1","STAG2","TERT*","TYRO3","ZNF217","APC","AURKA","BCL6","BTG1","CCND1","CD274","CDKN2A","CSF1R","DAXX","GID4","HGF","IKZF1","KDM5A","KMT2D","MAP3K13","MET","MST1R","NBN","NPM1","PARK2","PDGFRB","POLD1","PTEN","RAD51D","RICTOR","SDHC","SMO","STAT3","TGFBR2","U2AF1","ZNF703","AKT1","ARFRP1","AXL","BCR*","C11orf30","CCNE1","CDK12","CEBPA","CTNNA1","FOXL2","GNAQ","HSD3B1","IRF4","KDR","LYN","MDM2","MLH1","MUTYH","NFE2L2","NTRK1","PARP3","PIK3C2G","PPP2R1A","QKI","RAF1","RPTOR","SGK1","SOX2","SYK","TNFAIP3","WHSC1","AKT2","ARID1A","BAP1","BRAF","CALR","CD22","CDK4","CHEK1","CTNNB1","FUBP1","GNAS","ID3","IRS2","KEAP1","MAF","MDM4","MPL","MYB*","NFKBIA","NTRK2","PAX5","PIK3CA","PPP2R2A","RAC1","RARA","RSPO2*","SLC34A2*","SOX9","TBX3","TNFRSF14","WHSC1L1","AKT3","ASXL1","BARD1","BRCA1","CARD11","CD70","CDK6","CHEK2","CUL3","GABRA6","GRM3","IDH1","JAK1","KEL","MAP2K1","MED12","MRE11A","MYC","NKX2-1","NTRK3","PBRM1","PIK3CB","PRDM1","RAD21","RB1","Intron","SMAD2","SPEN","TEK","TP53","WT1","ALK","ATM","BCL2","BRCA2","CASP8","CD74*","CDK8","CIC","CUL4A","GATA3","GSK3B","IDH2","JAK2","KIT","MAP2K2","MEF2B","MSH2","MYCL","NOTCH1","NUTM1*","PDCD1","PIK3R1","PRKAR1A","RAD51","RBM10","SMAD4","SPOP","TET2","TSC1","XPO1"]
+    
+    CTA_Liquid=['File','TypeOftest','FMI_Test', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis',"APC","CDK6","FGFR2","PDCD1LG2","AR","CDK12","FOXL2","PTEN","PTPN11","RB1","SMO","STK11","TP53","VEGFA","ATM","BRCA1","BRCA2","CCND1","CD274","CDH1","CDK4","CDKN2A","CHEK2","CRKL","EGFR","ERBB2","ERRFI1","FGFR1","KRAS","MDM2","MET","MYC","MYCN","NF1","PALB2","ABL1","EZH2","JAK2","MTOR","MYD88","NRAS","PIK3CA","RAF1","AKT1","ALK","ARAF","BRAF","BTK","CTNNB1","DDR2","ESR1","RET","FGFR3","FLT3","GNA11","GNAQ","GNAS","HRAS","IDH1","IDH2","JAK3","KIT","MAP2K1","MAP2K2","MPL","NPM1","PDGFRA","PDGFRB","TERT","ROS1"]
+    
+    T7_395=['File','TypeOftest','FMI_Test', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis',"ABL1","AKT3","APCDD1","ARID1B","ATRX","BACH1","BCL2L1","BLM","BRD4","CARD11","CCND2","CD79B","CDH5","CDKN1A","CEBPA","CHUK","CRLF2","CUL3","DAXX","DNMT3A","EPHA5","EPHB6","ERG","FAM46C","FANCF","FAS","FGF12","FGF4","FGFR3","FLT3","FUBP1","GATA3","GLI1","GPR124","H3F3A","HNF1A","IDH1","IGF2R","INPP4B","JAK1","KDM5A","KEL","KMT2D","LTK","MAP2K2","MDM2","MERTK","MLH1","MST1R","MYCN","NF2","NOTCH2","NSD1","NUP93","PARP1","PBRM1","PHLPP2","PIK3CB","PMS2","PPP2R1A","PRKDC","PTEN","RAD50","RAD52","RB1","RNF43","RUNX1T1","SETD2","SMAD3","SMO","SOX9","STAG2","SYK","TERT","TNFAIP3","TOP2A","TSC2","VHL","XRCC3","ABL2","ALK","AR","ARID2","AURKA","BAP1","BCL2L2","BMPR1A","BRIP1","CASP8","CCND3","CDC73","CDK12","CDKN1B","CHD2","CIC","CSF1R","CUL4A","DDR1","DOT1L","EPHA6","ERBB2","ERRFI1","FANCA","FANCG","FAT1","FGF14","FGF6","FGFR4","FLT4","GABRA6","GATA4","GNA11","GREM1","HGF","HOXB13","IDH2","IKBKE","INSR","JAK2","KDM5C","KIT","LYN","MAP2K4","MDM4","MET","MPL","MTOR","MYD88","NFE2L2","NOTCH3","NTRK1","PAK3","PARP2","PDCD1LG2","PIK3C2B","PIK3CG","PNRC1","PRDM1","PRSS1","PTPN11","RAD51","RAD54L","RBM10","ROS1","SDHA","SF3B1","SMAD4","SNCAIP","SPEN","STAT3","TAF1","TNFRSF14","TP53","TSHR","WISP3","ZBTB2","ACVR1B","ALOX12B","ARAF","ASXL1","AURKB","BARD1","BCL6","BRAF","BTG1","CBFB","CCNE1","CDH1","CDK4","CDKN2A","CHD4","CRBN","CTCF","CUL4B","DDR2","EGFR","EPHA7","ERBB3","ESR1","FANCC","FANCI","FAT3","FGF19","FGF7","FH","FOXL2","GALNT12","GATA6","GNA13","GRIN2A","HLA-A","HRAS","IGF1","IKZF1","IRF2","JAK3","KDM6A","KLHL6","KRAS","LZTR1","MAP3K1","MED12","MITF","MRE11A","MUTYH","NBN","NFKBIA","NOTCH4","NTRK2","PAK7","PARP3","PDGFRA","PIK3C2G","PIK3R1","POLD1","PREX2","PRSS8","PTPRD","RAD51B","RAF1","REL","RPA1","SDHB","SH2B3","SMARCA4","SOCS1","SPOP","STAT4","TBX3","only)","TNKS","TP53BP1","TYRO3","WT1","ZNF217","AKT1","AMER1","ARFRP1","ATM","AXIN1","BCL2","BCOR","BRCA1","BTK","CBL","CD274","CDH2","CDK6","CDKN2B","CHEK1","CREBBP","CTNNA1","CYLD","DICER1","EP300","EPHB1","ERBB4","EZH2","FANCD2","FANCL","FBXW7","FGF23","FGFR1","FLCN","FOXP1","GATA1","GEN1","GNAQ","GRM3","HLA-B","HSD3B1","IGF1R","IL7R","IRF4","JUN","KDR","KMT2A","LMO1","MAGI2","MAP3K13","MEF2B","MKNK1","MSH2","MYC","NCOR1","NKX2-1","NPM1","NTRK3","PALB2","PARP4","PDGFRB","PIK3C3","PIK3R2","POLE","PRKAR1A","PTCH1","QKI","RANBP2","RET","RPTOR","SDHC","SLIT2","SMARCB1","SOX10","SPTA1","STK11","TEK","TET2","TNKS2","TRRAP","U2AF1","XPO1","ZNF703","AKT2","ARID1A","ATR","AXL","BCL2A1","BCORL1","BRCA2","C11orf30","CCND1","CD79A","CDH20","CDK8","CDKN2C","CHEK2","CRKL","CTNNB1","CYP17A1","DIS3","EPHA3","EPHB4","ERCC4","FAM175A","FANCE","FANCM","FGF10","FGF3","FGFR2","FLT1","FRS2","GATA2","GID4","GNAS","GSK3B","HLA-C","HSP90AA1","IGF2","INHBA","IRS2","KAT6A","KEAP1","LRP1B","MAP2K1","MCL1","MEN1","MKNK2","MSH6","MYCL","NF1","NOTCH1","NRAS","NUDT1","PARK2","PAX5","PDK1","PIK3CA","PLCG2","PPARG","PRKCI","PTCH2","RAC1","RAD51C","RARA","RICTOR","RUNX1","SDHD","SMAD2","SMARCD1","SOX2","SRC","SUFU","TERC","TGFBR2","TOP1","TSC1","VEGFA","XRCC2","ZNRF3","TNF","APC","KMT2C","LRP6","RAD51D","TIPARP"]
+    
+    T7_315_18=['File','TypeOftest','FMI_Test', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis',"ABL1","ARAF","AURKB","BCORL1","CARD11","CDC73","CDKN2C","CSF1R","DOT1L","ERG","FANCG","FGF4","FLT4","GATA6","GSK3B","IGF2","JAK2","KIT","MAGI2","MEN1","MYC","NOTCH2","PALB2","PIK3CB","PREX2","RAD50","ROS1","SLIT2","SOX2","SUFU","TOP1","WT1","ALK","ETV5","NTRK1","ABL2","ARFRP1","AXIN1","BLM","CBFB","CDH1","CEBPA","CTCF","EGFR","ERRFI1","FANCL","FGF6","FOXL2","GID4","H3F3A","IKBKE","JAK3","KLHL6","MAP2K1","MET","MYCL","NOTCH3","PARK2","PIK3CG","PRKAR1A","RAD51","RPTOR","SMAD2","SOX9","SYK","TOP2A","XPO1","BCL2","ETV6","NTRK2","ACVR1B","ARID1A","AXL","BRAF","CBL","CDK12","CHD2","CTNNA1","EP300","ESR1","FAS","FGFR1","FOXP1","HGF","IKZF1","JUN","KMT2A","MAP2K2","MITF","NPM1","PAX5","PIK3R1","PRKCI","RAF1","RUNX1","SMAD3","SPEN","TAF1","TET2","TP53","ZBTB2","BCR","PDGFRA","AKT1","ARID1B","BAP1","BRCA1","CCND1","CDK4","CHD4","CTNNB1","EPHA3","EZH2","FAT1","FGFR2","FRS2","GLI1","HNF1A","IL7R","KAT6A","MAP2K4","MLH1","MYCN","NRAS","PBRM1","PIK3R2","PRKDC","RANBP2","RUNX1T1","SMAD4","SPOP","TBX3","TGFBR2","TSC1","ZNF217","AKT2","ARID2","BARD1","BRCA2","CCND2","CDK6","CHEK1","CUL3","EPHA5","FAM46C","FBXW7","FGFR3","FUBP1","GNA11","HRAS","INHBA","KMT2C","MAP3K1","MPL","MYD88","NSD1","PDCD1LG2","PLCG2","PRSS8","RARA","SDHA","SMARCA4","SPTA1","TERC","TNFAIP3","TSC2","ZNF703","AKT3","ASXL1","BRD4","CCND3","CDK8","CHEK2","CYLD","EPHA7","FANCA","FGF10","FGFR4","GABRA6","GNA13","HSD3B1","INPP4B","KDM5A","MCL1","MRE11A","NF1","PMS2","PTCH1","RB1","SDHB","SMARCB1","SRC","TERT","TNFRSF14","TSHR","RET","ATM","BCL2L1","BRIP1","CCNE1","CDKN1A","CIC","DAXX","EPHB1","FANCC","FGF14","FH","GATA1","GNAQ","HSP90AA1","IRF2","KDM5C","KMT2D","MDM2","MSH2","NF2","PDGFRB","POLD1","PTEN","RBM10","SDHC","SMO","STAG2","U2AF1","AMER1","ATR","BCL2L2","BTG1","CD274","CDKN1B","CREBBP","DDR2","ERBB2","FANCD2","FGF19","FLCN","GATA2","GNAS","IDH1","IRF4","KDM6A","MDM4","MSH6","NFE2L2","NTRK3","PDK1","POLE","PTPN11","SDHD","SNCAIP","STAT3","VEGFA","MYB","TMPRSS2","ATRX","BCL6","BTK","CD79A","CDKN2A","CRKL","DICER1","ERBB3","FANCE","FGF23","FLT1","GATA3","GPR124","IDH2","IRS2","KDR","KRAS","MED12","MTOR","NFKBIA","NUP93","PIK3C2B","PPP2R1A","QKI","RICTOR","SETD2","SOCS1","STAT4","VHL","ETV1","APC","AURKA","BCOR","C11orf30","CD79B","CDKN2B","CRLF2","DNMT3A","ERBB4","FANCF","FGF3","FLT3","GATA4","GRIN2A","IGF1R","JAK1","KEAP1","LMO1","MEF2B","MUTYH","NKX2-1","PAK3","PIK3CA","PRDM1","RAC1","RNF43","SF3B1","SOX10","STK11","WISP3","ETV4","AR","GRM3","KEL","LRP1B","NOTCH1","LYN","LZTR1"]
+    
+    
+    # foundation_one = ['File','FMI_Test', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis','ABL1','ACVR1B','AKT1','AKT2','AKT3','ALK','ALOX12B','AMER1','APC','AR','ARAF','ARFRP1','ARID1A','ASXL1','ATM','ATR','ATRX','AURKA','AURKB','AXIN1','AXL','BAP1','BARD1','BCL2','BCL2L1','BCL2L2','BCL6','BCOR','BCORL1','BRAF','BRCA1','BRCA2','BRD4','BRIP1','BTG1','BTG2','BTK','C11orf30','CALR','CARD11','CASP8','CBFB','CBL','CCND1','CCND2','CCND3','CCNE1','CD22','CD274','CD70','CD79A','CD79B','CDC73','CDH1','CDK12','CDK4','CDK6','CDK8','CDKN1A','CDKN1B','CDKN2A','CDKN2B','CDKN2C','CEBPA','CHEK1','CHEK2','CIC','CREBBP','CRKL','CSF1R','CSF3R','CTCF','CTNNA1','CTNNB1','CUL3','CUL4A','CXCR4','CYP17A1','DAXX','DDR1','DDR2','DIS3','DNMT3A','DOT1L','EED','EGFR','EP300','EPHA3','EPHB1','EPHB4','ERBB2','ERBB3','ERBB4','ERCC4','ERG','ERRFI1','ESR1','EZH2','FAM46C','FANCA','FANCC','FANCG','FANCL','FAS','FBXW7','FGF10','FGF12','FGF14','FGF19','FGF23','FGF3','FGF4','FGF6','FGFR1','FGFR2','FGFR3','FGFR4','FH','FLCN','FLT1','FLT3','FOXL2','FUBP1','GABRA6','GATA3','GATA4','GATA6','GID4','GNA11','GNA13','GNAQ','GNAS','GRM3','GSK3B','H3F3A','HDAC1','HGF','HNF1A','HRAS','HSD3B1','ID3','IDH1','IDH2','IGF1R','IKBKE','IKZF1','INPP4B','IRF2','IRF4','IRS2','JAK1','JAK2','JAK3','JUN','KDM5A','KDM5C','KDM6A','KDR','KEAP1','KEL','KIT','KLHL6','KMT2A','KMT2D','KRAS','LTK','LYN','MAF','MAP2K1','MAP2K2','MAP2K4','MAP3K1','MAP3K13','MAPK1','MCL1','MDM2','MDM4','MED12','MEF2B','MEN1','MERTK','MET','MITF','MKNK1','MLH1','MPL','MRE11A','MSH2','MSH3','MSH6','MST1R','MTAP','MTOR','MUTYH','MYC','MYCL','MYCN','MYD88','NBN','NF1','NF2','NFE2L2','NFKBIA','NKX2-1','NOTCH1','NOTCH2','NOTCH3','NPM1','NRAS','NT5C2','NTRK1','NTRK2','NTRK3','P2RY8','PALB2','PARK2','PARP1','PARP2','PARP3','PAX5','PBRM1','PDCD1','PDCD1LG2','PDGFRA','PDGFRB','PDK1','PIK3C2B','PIK3C2G','PIK3CA','PIK3CB','PIK3R1','PIM1','PMS2','POLD1','POLE','PPARG','PPP2R1A','PPP2R2A','PRDM1','PRKAR1A','PRKCI','PTCH1','PTEN','PTPN11','PTPRO','QKI','RAC1','RAD21','RAD51','RAD51B','RAD51C','RAD51D','RAD52','RAD54L','RAF1','RARA','RB1','RBM10','REL','RET','RICTOR','RNF43','ROS1','RPTOR','SDHA','SDHB','SDHC','SDHD','SETD2','SF3B1','SGK1','SMAD2','SMAD4','SMARCA4','SMARCB1','SMO','SNCAIP','SOCS1','SOX2','SOX9','SPEN','SPOP','SRC','STAG2','STAT3','STK11','SUFU','SYK','TBX3','TEK','TET2','TGFBR2','TIPARP','TNFAIP3','TNFRSF14','TP53','TSC1','TSC2','TYRO3','U2AF1','VEGFA','VHL','WHSC1','WHSC1L1','WT1','XPO1','XRCC2','ZNF217','ZNF703','ALK','BCL2','BCR','BRAF','BRCA1','BRCA2','CD74','EGFR','ETV4','ETV5','ETV6','EWSR1','EZR','FGFR1','FGFR2','FGFR3','KIT','KMT2A','MSH2','MYB','MYC','NOTCH2','NTRK1','NTRK2','NUTM1','PDGFRA','RAF1','RARA','RET','ROS1','RSPO2','SDC4','SLC34A2','TERC','TERT','TMPRSS2','Loss of Heterozygosity score','Tumor Mutational Burden Score','Tumor Mutational Burden','Microsatellite (MS) status','Microsatellite Instability Status','Microsatellite Instability']
+    
+    
+    
     df = pd.DataFrame(data=None, columns=foundation_one, dtype=None, copy=False)
 
     for d in dicts_fundation_one:
