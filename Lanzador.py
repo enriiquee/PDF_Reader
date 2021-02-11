@@ -11,12 +11,9 @@ This launcher allows the execution of the virtual environment to run the script.
 
 """
 
-
 #Start tkinter gui function
 def tkinter_GUI():
     root = Tk()
-
-    
     root.columnconfigure(0, weight=0)
     root.columnconfigure(1, weight=1)
     root.rowconfigure(3, weight=1)
@@ -31,9 +28,6 @@ def tkinter_GUI():
 
     def doStuff():
         folder = folderPath.get()
-        #path = os.path.join("python "+os.getcwd(), "Helloworld.py")
-        #os.system(path)
-
         #Change directory
         os.chdir(folder)
         #Create a list with the pdf files. 
