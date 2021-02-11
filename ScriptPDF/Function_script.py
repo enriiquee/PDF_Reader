@@ -578,6 +578,7 @@ def detectData_Pfizer(string, pdf):
                 custData['Collection_Date'] = lines[i][16:]
             elif 'Received Date' in lines[i]:
                 custData['Received_Date'] = lines[i][14:]
+            elif 'Visit Type' in lines[i]:
                 custData['Visit_Type'] = lines[i][11:]
             elif "STUDY-RELATED ALTERATION(S) IDENTIFIED" in lines[i]:
                         #print(lines[i])
@@ -1585,6 +1586,27 @@ def fundation_one_generator(dicts_fundation_one):
             
         elif 'Microsatellite Instability Status' in d:
             d['Microsatellite Instability'] = d.pop('Microsatellite Instability Status')
+        
+        
+        
+        if 'BCR*' in d:
+            d['BCR'] = d.pop('BCR*')
+        elif 'CD74*' in d:
+            d['CD74'] = d.pop('CD74*')
+        elif 'MYB*' in d:
+            d['MYB'] = d.pop('MYB*')
+        elif 'NUTM1*' in d:
+            d['NUTM1'] = d.pop('NUTM1*')
+        elif 'RSPO2*' in d:	
+            d['RSPO2'] = d.pop('RSPO2*')           
+        elif 'TERC*' in d:	
+            d['TERC'] = d.pop('TERC*')
+        elif 'TERT*' in d:
+            d['TERT'] = d.pop('TERT*')
+        elif 'TMPRSS2*' in d:
+            d['TMPRSS2'] = d.pop('TMPRSS2*')
+
+
         
         
         # addd not analyzed to dicctionaries that doesn't have. 
