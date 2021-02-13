@@ -33,11 +33,14 @@ if __name__ == '__main__':
     for pdf in pdfs:
         string = convert_pdf_to_txt(pdf)
         type_of_Partner=detect_type_of_file(string, pdf)
-        print(type_of_Partner)
-        #print("NOMBRE DEL PDF: "+ pdf +"\n"+string)
-        custData=detectData(string,type_of_Partner,pdf)
-        
+
+        Type_of_pdf=detect_Type_of_pdf(string, pdf)
+        custData=detectData(string,type_of_Partner,pdf,Type_of_pdf)
         dicts_fundation_one.append(custData)
+        # print("NOMBRE DEL PDF: "+ pdf +"\n"+string)
+        # custData=detectData(string,type_of_Partner,pdf)
+        
+        # dicts_fundation_one.append(custData)
         
         # if custData["Test_Type"]=="FoundationOne DX1":
         #     #print(custData.keys())
