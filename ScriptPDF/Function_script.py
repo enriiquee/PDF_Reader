@@ -105,59 +105,76 @@ def detectData(string, type_of_partner, pdf,TypeOftest):
         # print("Detecto Bristol")
         return detectData_Bristol(string,pdf,TypeOftest)
 
-
 def detect_Type_of_pdf(string, pdf):
     
     TypeOftest=""
     lines=list(filter(None, string.split('\n')))
     
+    
+    if 'alterations within hundreds of cancer related genes. The CF3 test was utilized.' in lines or 'The CF3 test was utilized.' in lines or 'Genes Assayed in CF3:' in lines:
+        TypeOftest='CF3'
+    elif 'The Foundation Medicine test is a next-generation sequencing (NGS) based assay which identifies' in lines and 'genomic alterations within hundreds of cancer-related genes.' in lines or 'Genes Assayed in DX1:' in lines or 'Test Type FoundationOne DX1' in lines:
+        if 'FoundationOne® CDx CTA is designed to include genes known to be somatically altered in human' in lines:
+            TypeOftest='CTA_SOLID'
+        else:
+            TypeOftest='DX1'
+    elif 'substitutions, insertions and deletion alterations (indels) and copy number alterations (CNAs) in 324 genes, and select gene rearrangements, as' in lines or 'Test Type FoundationOne DX1 (SOLID)' in lines:
+        TypeOftest='CTA_SOLID'
+    elif 'This test is a next generation sequencing assay based on the FoundationOne® Liquid CDx CTA assay using the AB1 bait set to detect substitutions,' in lines and 'insertions and deletion alterations (indels) and '\
+        'copy number alterations (CNAs) in 324 genes, and select gene rearrangements, as well as genomic' in lines or 'Test Type FoundationOne Liquid AB1' in lines:
+        TypeOftest='CTA_LIQUID_AB1'
+    elif 'FoundationOne® Liquid is a next generation sequencing (NGS) assay that identifies clinically relevant genomic alterations in circulating tumor DNA.' in lines:
+        TypeOftest='CTA_Liquid'
+    elif 'The Foundation Medicine test is a next-generation (NGS) based assay which identifies genomic' in lines and 'alterations within 395 cancer-related genes. The T7 assay was utilized (Please see appendices below' in lines or 'Test Type FoundationOne Liquid' in lines:
+        TypeOftest='T7_395'
+    elif 'FoundationOne is a next-generation sequencing (NGS) based assay that identifies genomic alterations within hundreds of cancer-related genes.' in lines or 'Test Type FoundationOne' in lines:
+        TypeOftest='T7_315_28'
+        
+    
     # print(lines)
     
     # print(lines)
-    tester=True
-    for i in range(len(lines)):
-        # print(lines[i])
-        if 'The CF3 test was utilized' in lines[i] or 'Genes Assayed in CF3' in lines[i] and tester:
-            TypeOftest='CF3'
-            tester=False
-            # print(lines[i])
-        elif 'Genes Assayed in DX1' in lines[i] or 'genomic alterations within hundreds of cancer-related genes. FoundationOne test was utilized.' in lines[i] and tester:
-            if TypeOftest =='':
-                TypeOftest='DX1'
-                tester=False
-        elif 'FoundationOneDX1 is a next generation sequencing assay based on the FoundationOne®CDx FDA approved platform using the DX1 bait set to detect' in lines[i] or 'Test Type FoundationOne DX1 (SOLID)' in lines[i] and tester:
-            if TypeOftest =='':
-                TypeOftest='CTA_SOLID'
-                tester=False
-            # print(lines[i])
-        elif 'Liquid CDx CTA assay using the AB1' in lines[i] or 'Test Type FoundationOne Liquid AB1' in lines[i] and tester:
-            # print(lines[i])
-            if TypeOftest =='':
-                TypeOftest='CTA_LIQUID_AB1'
-                tester=False
-        elif 'FoundationOne® Liquid is a next generation sequencing' in lines[i] or 'Test Type FoundationOne Liquid' in lines[i] and tester:
-            if TypeOftest =='':
-                TypeOftest='CTA_Liquid'
-                tester=False
-        elif '395 cancer-related genes. The T7 assay was utilized' in lines[i] and tester:
-            # print(lines[i])
-            if TypeOftest =='':
-                TypeOftest='T7_395'
-                tester=False
-        elif 'The Foundation Medicine test is a next-generation sequencing (NGS) based assay which identifies' in lines[i] and 'genomic alterations within hundreds of cancer-related genes' in lines[i+1] or 'Test Type FoundationOne' in lines[i] and tester:
-            # print(lines[i])
-            if TypeOftest =='':
-                TypeOftest='T7_315_28'
-                tester=False
+    # tester=True
+    # for i in range(len(lines)):
+    #     # print(lines[i])
+    #     if 'The CF3 test was utilized' in lines[i] or 'Genes Assayed in CF3' in lines[i] and tester:
+    #         TypeOftest='CF3'
+    #         tester=False
+    #         # print(lines[i])
+    #     elif 'Genes Assayed in DX1' in lines[i] or 'genomic alterations within hundreds of cancer-related genes. FoundationOne test was utilized.' in lines[i] and tester:
+    #         if TypeOftest =='':
+    #             TypeOftest='DX1'
+    #             tester=False
+    #     elif 'FoundationOneDX1 is a next generation sequencing assay based on the FoundationOne®CDx FDA approved platform using the DX1 bait set to detect' in lines[i] or 'Test Type FoundationOne DX1 (SOLID)' in lines[i] and tester:
+    #         if TypeOftest =='':
+    #             TypeOftest='CTA_SOLID'
+    #             tester=False
+    #         # print(lines[i])
+    #     elif 'Liquid CDx CTA assay using the AB1' in lines[i] or 'Test Type FoundationOne Liquid AB1' in lines[i] and tester:
+    #         # print(lines[i])
+    #         if TypeOftest =='':
+    #             TypeOftest='CTA_LIQUID_AB1'
+    #             tester=False
+    #     elif 'FoundationOne® Liquid is a next generation sequencing' in lines[i] or 'Test Type FoundationOne Liquid' in lines[i] and tester:
+    #         if TypeOftest =='':
+    #             TypeOftest='CTA_Liquid'
+    #             tester=False
+    #     elif '395 cancer-related genes. The T7 assay was utilized' in lines[i] and tester:
+    #         # print(lines[i])
+    #         if TypeOftest =='':
+    #             TypeOftest='T7_395'
+    #             tester=False
+    #     elif 'The Foundation Medicine test is a next-generation sequencing (NGS) based assay which identifies' in lines[i] and 'genomic alterations within hundreds of cancer-related genes' in lines[i+1] or 'Test Type FoundationOne' in lines[i] and tester:
+    #         # print(lines[i])
+    #         if TypeOftest =='':
+    #             TypeOftest='T7_315_28'
+    #             tester=False
         
     if TypeOftest=="":
-        TypeOftest="*****Error in: ********"+pdf
+        TypeOftest="***Error in: ***"+pdf
         
     return(TypeOftest)
         
-    
-
-
 def detectData_Clovis(string, pdf, type_of_test):
     """
     Allow to extract info from Clovis Oncology 
@@ -223,11 +240,9 @@ def detectData_Clovis(string, pdf, type_of_test):
                     custData['Received_Date'] = lines[i][14:]
                 elif 'Visit Type' in lines[i]:
                     custData['Visit_Type'] = lines[i][11:]
-                elif 'Unfortunately,' in lines[i]:
-                    # print('UNFORTUNATELLY FOUNDED '+ pdf)
+                elif 'Unfortunately, we were not able' in lines[i]:
                     custData['Seria']='Unfortunately'
-                elif 'STUDY-RELATED' in lines[i]:
-                    custData['Seria']='Study'
+                
 
                 #GENOMIC FINDINGS
                 elif "GENOMIC FINDINGS" in lines[i]:
@@ -337,6 +352,7 @@ def detectData_Clovis(string, pdf, type_of_test):
             return custData
         
         elif 'STUDY-RELATED DELETERIOUS ALTERATION(S)' in lines:
+            custData['Seria']='Test Study'
             print('Clovis Blanco/Negro')
 
             for i in range(len(lines)):
@@ -376,14 +392,10 @@ def detectData_Clovis(string, pdf, type_of_test):
                     custData['Collection_Date'] = lines[i][16:]
                 elif 'Received Date' in lines[i]:
                     custData['Received_Date'] = lines[i][14:]
-                elif 'Unfortunately,' in lines[i]:
-                    # print('UNFORTUNATELLY FOUNDED '+ pdf)
-                    custData['Seria']='Unfortunately'
-                elif 'STUDY-RELATED' in lines[i]:
-                    custData['Seria']='Study'
                 elif 'Visit Type' in lines[i]:
                     custData['Visit_Type'] = lines[i][11:]
                 elif "STUDY-RELATED DELETERIOUS ALTERATION(S)" in lines[i]:
+                            custData['Seria']='Test Study'
                             #print(lines[i])
                             while lines[i]!='GENE':
                                 # print(lines[i])
@@ -457,14 +469,12 @@ def detectData_Clovis(string, pdf, type_of_test):
                 custData['Received_Date'] = lines[i][14:]
             elif 'Visit Type' in lines[i]:
                 custData['Visit_Type'] = lines[i][11:]
-            elif 'Unfortunately,' in lines[i]:
-                # print('UNFORTUNATELLY FOUNDED '+ pdf)
+            elif 'Unfortunately, we were not able' in lines[i]:
                 custData['Seria']='Unfortunately'
-            elif 'STUDY-RELATED' in lines[i]:
-                custData['Seria']='Study'
 
             #GENOMIC FINDINGS
             elif "STUDY-RELATED DELETERIOUS ALTERATION(S) IDENTIFIED" in lines[i]:
+                custData['Seria']='Test Study'
                 #print(lines[i])
                 while lines[i]!='GENE':
                     #print(lines[i])
@@ -641,12 +651,10 @@ def detectData_Pfizer(string, pdf,type_of_test):
                 custData['Received_Date'] = lines[i][14:]
             elif 'Visit Type' in lines[i]:
                 custData['Visit_Type'] = lines[i][11:]
-            elif 'Unfortunately,' in lines[i]:
-                # print('UNFORTUNATELLY FOUNDED '+ pdf)
+            elif 'Unfortunately, we were not able' in lines[i]:
                 custData['Seria']='Unfortunately'
-            elif 'STUDY-RELATED' in lines[i]:
-                custData['Seria']='Study'
             elif "STUDY-RELATED ALTERATION(S) IDENTIFIED" in lines[i]:
+                        custData['Seria']='Test Study'
                         #print(lines[i])
                         while lines[i]!='GENE':
                             # print(lines[i])
@@ -713,13 +721,11 @@ def detectData_Pfizer(string, pdf,type_of_test):
                 custData['Received_Date'] = lines[i][14:]
             elif 'Visit Type' in lines[i]:
                 custData['Visit_Type'] = lines[i][11:]
-            elif 'Unfortunately,' in lines[i]:
-                # print('UNFORTUNATELLY FOUNDED '+ pdf)
+            elif 'Unfortunately, we were not able' in lines[i]:
                 custData['Seria']='Unfortunately'
-            elif 'STUDY-RELATED' in lines[i]:
-                custData['Seria']='Study'
 
             elif "STUDY-RELATED ALTERATION(S) IDENTIFIED" in lines[i]:
+                        custData['Seria']='Test Study'
                         #print(lines[i])
                         while lines[i]!='GENE':
                             # print(lines[i])
@@ -796,11 +802,8 @@ def detectData_Pfizer(string, pdf,type_of_test):
                 custData['Received_Date'] = lines[i][14:]
             elif 'Visit Type' in lines[i]:
                 custData['Visit_Type'] = lines[i][11:]
-            elif 'Unfortunately,' in lines[i]:
-                # print('UNFORTUNATELLY FOUNDED '+ pdf)
+            elif 'Unfortunately, we were not able' in lines[i]:
                 custData['Seria']='Unfortunately'
-            elif 'STUDY-RELATED' in lines[i]:
-                custData['Seria']='Study'
 
             #GENOMIC FINDINGS
             elif "GENOMIC FINDINGS" in lines[i]:
@@ -960,11 +963,9 @@ def detectData_Pfizer(string, pdf,type_of_test):
                 custData['Received_Date'] = lines[i][14:]
             elif 'Visit Type' in lines[i]:
                 custData['Visit_Type'] = lines[i][11:]
-            elif 'Unfortunately,' in lines[i]:
-                # print('UNFORTUNATELLY FOUNDED '+ pdf)
+            elif 'Unfortunately, we were not able' in lines[i]:
                 custData['Seria']='Unfortunately'
-            elif 'STUDY-RELATED' in lines[i]:
-                custData['Seria']='Study'
+
 
             #GENOMIC FINDINGS
             elif "Enrollment Criteria" in lines[i]:
@@ -1130,11 +1131,9 @@ def detectData_Roche(string, pdf,type_of_test):
                 custData['Received_Date'] = lines[i][14:]
             elif 'Visit Type' in lines[i]:
                 custData['Visit_Type'] = lines[i][11:]
-            elif 'Unfortunately,' in lines[i]:
-                # print('UNFORTUNATELLY FOUNDED '+ pdf)
+            elif 'Unfortunately, we were not able' in lines[i]:
                 custData['Seria']='Unfortunately'
-            elif 'STUDY-RELATED' in lines[i]:
-                custData['Seria']='Study'
+
                 
             #Potential Enrollment Eligible Alterations
             elif "Potential Enrollment Eligible Alterations" in lines[i]:
@@ -1297,11 +1296,10 @@ def detectData_Roche(string, pdf,type_of_test):
                 custData['Received_Date'] = lines[i][14:]
             elif 'Visit Type' in lines[i]:
                 custData['Visit_Type'] = lines[i][11:]
-            elif 'Unfortunately,' in lines[i]:
-                # print('UNFORTUNATELLY FOUNDED '+ pdf)
+            elif 'Unfortunately, we were not able' in lines[i]:
                 custData['Seria']='Unfortunately'
-            elif 'STUDY-RELATED' in lines[i]:
-                custData['Seria']='Study'
+
+
                 
             elif "Enrollment Eligible Alterations" in lines[i]:
                 try:
@@ -1495,9 +1493,13 @@ def detectData_Bristol(string,pdf,type_of_test):
             custData['Collection_Date'] = lines[i][16:]
         elif 'RECEIVED DATE' in lines[i]:
             custData['Received_Date'] = lines[i][14:]
+            
+        elif 'Unfortunately, we were not able' in lines[i]:
+            custData['Seria']='Unfortunately'
  
         #GENOMIC FINDINGS
         elif "STUDY-RELATED DELETERIOUS ALTERATION(S) IDENTIFIED" in lines[i]:
+            custData['Seria']='Test Study'
             #print(lines[i])
             while lines[i]!='GENE':
                 #print(lines[i])
@@ -1667,6 +1669,11 @@ def fundation_one_generator(dicts_fundation_one):
                 if key not in d:
                     d[key]=0
         
+        #Testing Seria
+        if 'Seria' not in d:
+            d['Seria']='\u2713'
+
+        
         #Combine Microsatellity status: 
         
         if 'Microsatellite (MS) status' in d:
@@ -1676,7 +1683,7 @@ def fundation_one_generator(dicts_fundation_one):
             d['Microsatellite Instability'] = d.pop('Microsatellite Instability Status')
         
         
-        
+        #Change Genes with * without *
         if 'BCR*' in d:
             d['BCR'] = d.pop('BCR*')
         elif 'CD74*' in d:
@@ -1702,12 +1709,6 @@ def fundation_one_generator(dicts_fundation_one):
         for i in foundation_one:
             if i not in d:
                 d[i]='--'
-                
-        # #Changing gene. 
-        # for i in ["BCR*","CD74*","MYB*","NUTM1*","RSPO2*","SLC34A2*","TERC*","TERT*","TMPRSS2"]:
-        #     if i in 
-        
-            
         
         df = df.append(d, ignore_index=True)
     #Eliminamos las columnas que no nos interesan. 
