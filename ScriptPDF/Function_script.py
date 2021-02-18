@@ -1658,7 +1658,7 @@ def fundation_one_generator(dicts_fundation_one):
             
         #Change all the none or none detected by 0. 
         for key in d.keys():
-            if d[key]=='None' or d[key]=='None Detected' or d[key]='Not Evaluable':
+            if d[key]=='None' or d[key]=='None Detected' or d[key]=='Not Evaluable' or d[key]=='Not Found':
                 d[key]=0
         
         
@@ -1679,18 +1679,18 @@ def fundation_one_generator(dicts_fundation_one):
             d['TERT'] = d.pop('TERT*')
         elif 'TMPRSS2*' in d:
             d['TMPRSS2'] = d.pop('TMPRSS2*')
-            
-        #Testing Sample Failure:
-        if d['Sample Failure']='Yes':
-            for key in     
+             
             
             
         # addd not analyzed to dicctionaries that doesn't have.
-        
-        
-        for i in foundation_one:
+        for i in foundation_one[15::]:
             if i not in d:
                 d[i]='--'
+
+        #Testing Sample Failure:
+        if d['Sample Failure']=='Yes':
+            for i in foundation_one[16::]:
+                d[i]="-"   
         
         df = df.append(d, ignore_index=True)
     #Eliminamos las columnas que no nos interesan. 
