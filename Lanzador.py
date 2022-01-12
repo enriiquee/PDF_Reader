@@ -50,7 +50,7 @@ def tkinter_GUI():
 
         #Functions: 
         def getFolderPath():
-            folder_selected = filedialog.askdirectory()
+            folder_selected = filedialog.askdirectory() 
             folderPath.set(folder_selected)
 
         def doStuff():
