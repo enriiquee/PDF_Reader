@@ -7,7 +7,7 @@ This script allow us to detect what type of data we have. This is only a tester,
 
 #path of folder containing several PDFs
 #path=r'C:/Users/enriq/Dropbox/Lector_adobe/PDF/'   
-path=r'C:/Users/enriq/Dropbox/Doctorado/PFIS-WB/PDFs Foundation Piloto de prueba/FOUNDATION PILOTAJE DE IMPORTACION'  
+path=r'C:/Users/eperez2/OneDrive - UNIVERSIDAD DE MURCIA/PDF_Reader/Archivos/New files'  
 #Change directory
 os.chdir(path)
 #Create a list with the pdf files. 

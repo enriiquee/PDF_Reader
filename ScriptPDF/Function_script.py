@@ -62,10 +62,12 @@ def detect_type_of_file(string, pdf):
                     type_of_file='Bristol-Myers'
                     return type_of_file
                 else:
+                    type_of_file='No cumple formato'
                     print("Hay un archivo que no cumple este formato "+pdf)
+                    return type_of_file
     
     else:
-         print('No tiene.' + 'Nombre del archivo: '+ pdf )
+         print('No contiene información sobre el Partner. ' + 'Nombre del archivo: '+ pdf )
 
     #Eliminamos las tabulaciones. 
     #lines = list(filter(None,string.split('\n')))
@@ -135,7 +137,7 @@ def detect_Type_of_pdf(string, pdf):
             TypeOftest=''
         else:
             TypeOftest='T7_315_28'
-        
+       
         
     if TypeOftest=="":
         TypeOftest="***Error in: ***"+pdf
@@ -1578,7 +1580,7 @@ def detectData_Bristol(string,pdf,type_of_test):
     return custData
   
                                
-def fundation_one_generator(dicts_fundation_one): 
+def fundation_one_generator(dicts_fundation_one, pdfs): 
     """
     Create a excel file with the data extracted previously. 
     :input: Dictionary with the data
@@ -1603,101 +1605,124 @@ def fundation_one_generator(dicts_fundation_one):
     
     T7_315_18=["ABL1","ARAF","AURKB","BCORL1","CARD11","CDC73","CDKN2C","CSF1R","DOT1L","ERG","FANCG","FGF4","FLT4","GATA6","GSK3B","IGF2","JAK2","KIT","MAGI2","MEN1","MYC","NOTCH2","PALB2","PIK3CB","PREX2","RAD50","ROS1","SLIT2","SOX2","SUFU","TOP1","WT1","ALK","ETV5","NTRK1","ABL2","ARFRP1","AXIN1","BLM","CBFB","CDH1","CEBPA","CTCF","EGFR","ERRFI1","FANCL","FGF6","FOXL2","GID4","H3F3A","IKBKE","JAK3","KLHL6","MAP2K1","MET","MYCL","NOTCH3","PARK2","PIK3CG","PRKAR1A","RAD51","RPTOR","SMAD2","SOX9","SYK","TOP2A","XPO1","BCL2","ETV6","NTRK2","ACVR1B","ARID1A","AXL","BRAF","CBL","CDK12","CHD2","CTNNA1","EP300","ESR1","FAS","FGFR1","FOXP1","HGF","IKZF1","JUN","KMT2A","MAP2K2","MITF","NPM1","PAX5","PIK3R1","PRKCI","RAF1","RUNX1","SMAD3","SPEN","TAF1","TET2","TP53","ZBTB2","BCR","PDGFRA","AKT1","ARID1B","BAP1","BRCA1","CCND1","CDK4","CHD4","CTNNB1","EPHA3","EZH2","FAT1","FGFR2","FRS2","GLI1","HNF1A","IL7R","KAT6A","MAP2K4","MLH1","MYCN","NRAS","PBRM1","PIK3R2","PRKDC","RANBP2","RUNX1T1","SMAD4","SPOP","TBX3","TGFBR2","TSC1","ZNF217","AKT2","ARID2","BARD1","BRCA2","CCND2","CDK6","CHEK1","CUL3","EPHA5","FAM46C","FBXW7","FGFR3","FUBP1","GNA11","HRAS","INHBA","KMT2C","MAP3K1","MPL","MYD88","NSD1","PDCD1LG2","PLCG2","PRSS8","RARA","SDHA","SMARCA4","SPTA1","TERC","TNFAIP3","TSC2","ZNF703","AKT3","ASXL1","BRD4","CCND3","CDK8","CHEK2","CYLD","EPHA7","FANCA","FGF10","FGFR4","GABRA6","GNA13","HSD3B1","INPP4B","KDM5A","MCL1","MRE11A","NF1","PMS2","PTCH1","RB1","SDHB","SMARCB1","SRC","TERT","TNFRSF14","TSHR","RET","ATM","BCL2L1","BRIP1","CCNE1","CDKN1A","CIC","DAXX","EPHB1","FANCC","FGF14","FH","GATA1","GNAQ","HSP90AA1","IRF2","KDM5C","KMT2D","MDM2","MSH2","NF2","PDGFRB","POLD1","PTEN","RBM10","SDHC","SMO","STAG2","U2AF1","AMER1","ATR","BCL2L2","BTG1","CD274","CDKN1B","CREBBP","DDR2","ERBB2","FANCD2","FGF19","FLCN","GATA2","GNAS","IDH1","IRF4","KDM6A","MDM4","MSH6","NFE2L2","NTRK3","PDK1","POLE","PTPN11","SDHD","SNCAIP","STAT3","VEGFA","MYB","TMPRSS2","ATRX","BCL6","BTK","CD79A","CDKN2A","CRKL","DICER1","ERBB3","FANCE","FGF23","FLT1","GATA3","GPR124","IDH2","IRS2","KDR","KRAS","MED12","MTOR","NFKBIA","NUP93","PIK3C2B","PPP2R1A","QKI","RICTOR","SETD2","SOCS1","STAT4","VHL","ETV1","APC","AURKA","BCOR","C11orf30","CD79B","CDKN2B","CRLF2","DNMT3A","ERBB4","FANCF","FGF3","FLT3","GATA4","GRIN2A","IGF1R","JAK1","KEAP1","LMO1","MEF2B","MUTYH","NKX2-1","PAK3","PIK3CA","PRDM1","RAC1","RNF43","SF3B1","SOX10","STK11","WISP3","ETV4","AR","GRM3","KEL","LRP1B","NOTCH1","LYN","LZTR1"]
     
-    
+    numberOfPDF=0
     df = pd.DataFrame(data=None, columns=foundation_one, dtype=None, copy=False)
 
     # foundation_one = ['File','FMI_Test', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis','ABL1','ACVR1B','AKT1','AKT2','AKT3','ALK','ALOX12B','AMER1','APC','AR','ARAF','ARFRP1','ARID1A','ASXL1','ATM','ATR','ATRX','AURKA','AURKB','AXIN1','AXL','BAP1','BARD1','BCL2','BCL2L1','BCL2L2','BCL6','BCOR','BCORL1','BRAF','BRCA1','BRCA2','BRD4','BRIP1','BTG1','BTG2','BTK','C11orf30','CALR','CARD11','CASP8','CBFB','CBL','CCND1','CCND2','CCND3','CCNE1','CD22','CD274','CD70','CD79A','CD79B','CDC73','CDH1','CDK12','CDK4','CDK6','CDK8','CDKN1A','CDKN1B','CDKN2A','CDKN2B','CDKN2C','CEBPA','CHEK1','CHEK2','CIC','CREBBP','CRKL','CSF1R','CSF3R','CTCF','CTNNA1','CTNNB1','CUL3','CUL4A','CXCR4','CYP17A1','DAXX','DDR1','DDR2','DIS3','DNMT3A','DOT1L','EED','EGFR','EP300','EPHA3','EPHB1','EPHB4','ERBB2','ERBB3','ERBB4','ERCC4','ERG','ERRFI1','ESR1','EZH2','FAM46C','FANCA','FANCC','FANCG','FANCL','FAS','FBXW7','FGF10','FGF12','FGF14','FGF19','FGF23','FGF3','FGF4','FGF6','FGFR1','FGFR2','FGFR3','FGFR4','FH','FLCN','FLT1','FLT3','FOXL2','FUBP1','GABRA6','GATA3','GATA4','GATA6','GID4','GNA11','GNA13','GNAQ','GNAS','GRM3','GSK3B','H3F3A','HDAC1','HGF','HNF1A','HRAS','HSD3B1','ID3','IDH1','IDH2','IGF1R','IKBKE','IKZF1','INPP4B','IRF2','IRF4','IRS2','JAK1','JAK2','JAK3','JUN','KDM5A','KDM5C','KDM6A','KDR','KEAP1','KEL','KIT','KLHL6','KMT2A','KMT2D','KRAS','LTK','LYN','MAF','MAP2K1','MAP2K2','MAP2K4','MAP3K1','MAP3K13','MAPK1','MCL1','MDM2','MDM4','MED12','MEF2B','MEN1','MERTK','MET','MITF','MKNK1','MLH1','MPL','MRE11A','MSH2','MSH3','MSH6','MST1R','MTAP','MTOR','MUTYH','MYC','MYCL','MYCN','MYD88','NBN','NF1','NF2','NFE2L2','NFKBIA','NKX2-1','NOTCH1','NOTCH2','NOTCH3','NPM1','NRAS','NT5C2','NTRK1','NTRK2','NTRK3','P2RY8','PALB2','PARK2','PARP1','PARP2','PARP3','PAX5','PBRM1','PDCD1','PDCD1LG2','PDGFRA','PDGFRB','PDK1','PIK3C2B','PIK3C2G','PIK3CA','PIK3CB','PIK3R1','PIM1','PMS2','POLD1','POLE','PPARG','PPP2R1A','PPP2R2A','PRDM1','PRKAR1A','PRKCI','PTCH1','PTEN','PTPN11','PTPRO','QKI','RAC1','RAD21','RAD51','RAD51B','RAD51C','RAD51D','RAD52','RAD54L','RAF1','RARA','RB1','RBM10','REL','RET','RICTOR','RNF43','ROS1','RPTOR','SDHA','SDHB','SDHC','SDHD','SETD2','SF3B1','SGK1','SMAD2','SMAD4','SMARCA4','SMARCB1','SMO','SNCAIP','SOCS1','SOX2','SOX9','SPEN','SPOP','SRC','STAG2','STAT3','STK11','SUFU','SYK','TBX3','TEK','TET2','TGFBR2','TIPARP','TNFAIP3','TNFRSF14','TP53','TSC1','TSC2','TYRO3','U2AF1','VEGFA','VHL','WHSC1','WHSC1L1','WT1','XPO1','XRCC2','ZNF217','ZNF703','ALK','BCL2','BCR','BRAF','BRCA1','BRCA2','CD74','EGFR','ETV4','ETV5','ETV6','EWSR1','EZR','FGFR1','FGFR2','FGFR3','KIT','KMT2A','MSH2','MYB','MYC','NOTCH2','NTRK1','NTRK2','NUTM1','PDGFRA','RAF1','RARA','RET','ROS1','RSPO2','SDC4','SLC34A2','TERC','TERT','TMPRSS2','Loss of Heterozygosity score','Tumor Mutational Burden Score','Tumor Mutational Burden','Microsatellite (MS) status','Microsatellite Instability Status','Microsatellite Instability']
     
     # We check what type of file we have. 
     for d in dicts_fundation_one:
-        # print(d)
-        
-        if d['TypeOftest']=='CTA_SOLID':
-            for key in CTA_SOLID:
-                if key not in d:
-                    d[key]=0
-        elif d['TypeOftest']=='DX1':
-            for key in DX1:
-                if key not in d:
-                    d[key]=0
-        elif d['TypeOftest']=='CF3':
-            for key in CF3:
-                if key not in d:
-                    d[key]=0
-        elif d['TypeOftest']=='CTA_LIQUID_AB1':
-            for key in CTA_Liquid_AB1:
-                if key not in d:
-                    d[key]=0
-        elif d['TypeOftest']=='CTA_Liquid':
-            for key in CTA_Liquid:
-                if key not in d:
-                    d[key]=0
-        elif d['TypeOftest']=='T7_395':
-            for key in T7_395:
-                if key not in d:
-                    d[key]=0
-        elif d['TypeOftest']=='T7_315_28':
-            for key in T7_315_18:
-                if key not in d:
-                    d[key]=0
-        
-        #Add No value in Sample Failure: 
-        if 'Sample Failure' not in d:
-            d['Sample Failure']='No'
-        
-        #Add yes to study related. 
-        if 'Study Related' not in d:
-            d['Study Related']='Yes'
-               
-        #Combine Microsatellity status:         
-        if 'Microsatellite (MS) status' in d:
-            d['Microsatellite Instability'] = d.pop('Microsatellite (MS) status')
-            
-        elif 'Microsatellite Instability Status' in d:
-            d['Microsatellite Instability'] = d.pop('Microsatellite Instability Status')
-            
-        #Change all the none or none detected by 0. 
-        for key in d.keys():
-            if d[key]=='None' or d[key]=='None Detected' or d[key]=='Not Evaluable' or d[key]=='Not Found':
-                d[key]=0
-        
-        
-        #Change Genes with * without *
-        if 'BCR*' in d:
-            d['BCR'] = d.pop('BCR*')
-        elif 'CD74*' in d:
-            d['CD74'] = d.pop('CD74*')
-        elif 'MYB*' in d:
-            d['MYB'] = d.pop('MYB*')
-        elif 'NUTM1*' in d:
-            d['NUTM1'] = d.pop('NUTM1*')
-        elif 'RSPO2*' in d:	
-            d['RSPO2'] = d.pop('RSPO2*')           
-        elif 'TERC*' in d:	
-            d['TERC'] = d.pop('TERC*')
-        elif 'TERT*' in d:
-            d['TERT'] = d.pop('TERT*')
-        elif 'TMPRSS2*' in d:
-            d['TMPRSS2'] = d.pop('TMPRSS2*')
-             
-            
-            
-        # addd not analyzed to dicctionaries that doesn't have.
-        for i in foundation_one[15::]:
-            if i not in d:
-                d[i]='--'
+        #print(d) 
+        if d is None:
+            print("El archivo: "+pdfs[numberOfPDF]+" no cumple el formato")
+            numberOfPDF+=1
 
-        #Testing Sample Failure:
-        if d['Sample Failure']=='Yes':
-            for i in foundation_one[16::]:
-                d[i]="-"   
-        
-        df = df.append(d, ignore_index=True)
+            pass
+        else:
+            numberOfPDF+=1
+            if d['TypeOftest']=='CTA_SOLID':
+                for key in CTA_SOLID:
+                    if key not in d:
+                        d[key]=0
+            elif d['TypeOftest']=='DX1':
+                for key in DX1:
+                    if key not in d:
+                        d[key]=0
+            elif d['TypeOftest']=='CF3':
+                for key in CF3:
+                    if key not in d:
+                        d[key]=0
+            elif d['TypeOftest']=='CTA_LIQUID_AB1':
+                for key in CTA_Liquid_AB1:
+                    if key not in d:
+                        d[key]=0
+            elif d['TypeOftest']=='CTA_Liquid':
+                for key in CTA_Liquid:
+                    if key not in d:
+                        d[key]=0
+            elif d['TypeOftest']=='T7_395':
+                for key in T7_395:
+                    if key not in d:
+                        d[key]=0
+            elif d['TypeOftest']=='T7_315_28':
+                for key in T7_315_18:
+                    if key not in d:
+                        d[key]=0
+
+            elif d['TypeOftest'] is None:
+                print('No info about it')
+            
+            #Add No value in Sample Failure: 
+            if 'Sample Failure' not in d:
+                d['Sample Failure']='No'
+            
+            #Add yes to study related. 
+            if 'Study Related' not in d:
+                d['Study Related']='Yes'
+                
+            #Combine Microsatellity status:         
+            if 'Microsatellite (MS) status' in d:
+                d['Microsatellite Instability'] = d.pop('Microsatellite (MS) status')
+                
+            elif 'Microsatellite Instability Status' in d:
+                d['Microsatellite Instability'] = d.pop('Microsatellite Instability Status')
+                
+            #Change all the none or none detected by 0. 
+            for key in d.keys():
+                if d[key]=='None' or d[key]=='None Detected' or d[key]=='Not Evaluable' or d[key]=='Not Found':
+                    d[key]=0
+            
+            
+            #Change Genes with * without *
+            if 'BCR*' in d:
+                d['BCR'] = d.pop('BCR*')
+            elif 'CD74*' in d:
+                d['CD74'] = d.pop('CD74*')
+            elif 'MYB*' in d:
+                d['MYB'] = d.pop('MYB*')
+            elif 'NUTM1*' in d:
+                d['NUTM1'] = d.pop('NUTM1*')
+            elif 'RSPO2*' in d:	
+                d['RSPO2'] = d.pop('RSPO2*')           
+            elif 'TERC*' in d:	
+                d['TERC'] = d.pop('TERC*')
+            elif 'TERT*' in d:
+                d['TERT'] = d.pop('TERT*')
+            elif 'TMPRSS2*' in d:
+                d['TMPRSS2'] = d.pop('TMPRSS2*')
+                
+                
+                
+            # addd not analyzed to dicctionaries that doesn't have.
+            for i in foundation_one[15::]:
+                if i not in d:
+                    d[i]='--'
+
+            #Testing Sample Failure:
+            if d['Sample Failure']=='Yes':
+                for i in foundation_one[16::]:
+                    d[i]="-"   
+            
+            df = df.append(d, ignore_index=True)
     #Eliminamos las columnas que no nos interesan. 
     try:
-        df.drop(['Partner_Study','Subjet', 'Site_ID', 'Specimen_ID','Partner Study ID'], axis = 1, inplace=True) 
+        if 'Partner_Study' in df.columns:
+            df.drop(['Partner_Study'], axis = 1, inplace=True) 
             # del df['Partner_Study, Site_ID,	Specimen_ID,Subjet']
             # df.drop(['column_nameA', 'column_nameB'], axis=1, inplace=True)
+    
+        if 'Subjet' in df.columns:
+            df.drop(['Subjet'], axis = 1, inplace=True) 
+
+        if 'Site_ID' in df.columns:
+            df.drop(['Site_ID'], axis = 1, inplace=True) 
+
+        if 'Specimen_ID' in df.columns:
+            df.drop(['Specimen_ID'], axis = 1, inplace=True) 
+
+        if 'Partner Study ID' in df.columns:
+            df.drop(['Partner Study ID'], axis = 1, inplace=True)        
+
     except:
         print("Error removing columns")
 

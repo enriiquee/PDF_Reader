@@ -88,7 +88,7 @@ def tkinter_GUI():
                 #     pass
             
             logger.info('Saving results...')
-            fundation_one_generator(dicts_fundation_one)
+            fundation_one_generator(dicts_fundation_one, pdfs)
             logger.info('Done. Exiting program.')
             #Message info:
             messagebox.showinfo('Info', 'Process completed!')
