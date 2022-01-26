@@ -44,8 +44,10 @@ def detect_type_of_file(string, pdf):
     We check that the files contain the Partner Name, as they exist of Clovis, Pfizer and Roche
     """
     type_of_file=""
+    # print(string)
     if 'Partner Name' in string or 'PARTNER NAME' in string: 
-        lines = list(filter(None,string.split('\n'))) 
+        lines = list(filter(None,string.split('\n')))
+        #print(lines) 
         for i in range(len(lines)): #Comprobamos de que tipo de Partner es. 
             if 'Partner Name' in lines[i] or 'PARTNER NAME' in lines[i]:
                 #print(lines[i] + 'Nombre del archivo: '+ pdf )
@@ -61,34 +63,41 @@ def detect_type_of_file(string, pdf):
                 elif 'BRISTOL-MYERS' in lines[i]:
                     type_of_file='Bristol-Myers'
                     return type_of_file
+                elif 'Johnson and Johnson' in lines[i] or 'Janssen' in lines[i]:
+                    type_of_file='Janssen'
+                    return type_of_file
+                    # print("Detecto Janssen")
                 else:
                     type_of_file='No cumple formato'
                     print("Hay un archivo que no cumple este formato "+pdf)
                     return type_of_file
     
+    elif 'Janssen Study' in string:
+        type_of_file='Janssen'
+        return type_of_file
     else:
          print('No contiene información sobre el Partner. ' + 'Nombre del archivo: '+ pdf )
 
-    #Eliminamos las tabulaciones. 
-    #lines = list(filter(None,string.split('\n')))
+        # Eliminamos las tabulaciones. 
+        # lines = list(filter(None,string.split('\n')))
 
-    # if 'Test Type' in string: #Comprobamos si existe el test type en el archivo.
-    #     lines = list(filter(None,string.split('\n')))
-    #     for i in range(len(lines)):
-    #         if 'Test Type' in lines[i]:
-    #             if 'Liquid' in lines[i]:
-    #                 test_type='Liquid'
-    #                 return test_type
-    #             elif 'FoundationOne DX1' in lines[i]:
-    #                 test_type='FoundationOne DX1'
-    #                 return test_type
-    #             elif '(SOLID)' in lines[i]:
-    #                 test_type='Solid'
-    #                 return test_type
-    # else:
-    #     test_type="No_Type"
-    #     return test_type
-    #     print("No tiene tipo de muestra")
+        # if 'Test Type' in string: #Comprobamos si existe el test type en el archivo.
+        #     lines = list(filter(None,string.split('\n')))
+        #     for i in range(len(lines)):
+        #         if 'Test Type' in lines[i]:
+        #             if 'Liquid' in lines[i]:
+        #                 test_type='Liquid'
+        #                 return test_type
+        #             elif 'FoundationOne DX1' in lines[i]:
+        #                 test_type='FoundationOne DX1'
+        #                 return test_type
+        #             elif '(SOLID)' in lines[i]:
+        #                 test_type='Solid'
+        #                 return test_type
+        # else:
+        #     test_type="No_Type"
+        #     return test_type
+        #     print("No tiene tipo de muestra")
         
 def detectData(string, type_of_partner, pdf,TypeOftest):
     """
@@ -106,6 +115,10 @@ def detectData(string, type_of_partner, pdf,TypeOftest):
     elif type_of_partner=='Bristol-Myers':
         # print("Detecto Bristol")
         return detectData_Bristol(string,pdf,TypeOftest)
+    elif type_of_partner=='Janssen':
+        # print("Detecto Janssen")
+        return detectData_Janssen(string,pdf,TypeOftest)
+        
 
 def detect_Type_of_pdf(string, pdf):
     """"
@@ -114,7 +127,7 @@ def detect_Type_of_pdf(string, pdf):
     
     TypeOftest=""
     lines=list(filter(None, string.split('\n')))
-    
+    # print(lines)
     
     if 'alterations within hundreds of cancer related genes. The CF3 test was utilized.' in lines or 'The CF3 test was utilized.' in lines or 'Genes Assayed in CF3:' in lines:
         TypeOftest='CF3'
@@ -137,7 +150,8 @@ def detect_Type_of_pdf(string, pdf):
             TypeOftest=''
         else:
             TypeOftest='T7_315_28'
-       
+    elif 'Note: This is a QUALIFIED report. This specimen failed to meet minimum performance' in lines:
+        TypeOftest='QUALIFIED'
         
     if TypeOftest=="":
         TypeOftest="***Error in: ***"+pdf
@@ -560,7 +574,7 @@ def detectData_Clovis(string, pdf, type_of_test):
 def detectData_Pfizer(string, pdf,type_of_test):
     """
     Allow to extract info from Pfizer files
-    :Param: string
+    :Param: string, pdf, type_of_test
     :return : Dictionary with all the elements extracted.
     """
     #Creamos una lista con las lineas separadas. 
@@ -579,7 +593,7 @@ def detectData_Pfizer(string, pdf,type_of_test):
 
     #Vemos que tipo de FoundationOne es:
     if 'Test Type FoundationOne Liquid AB1' in lines:
-        print("Pfizer Liquido")
+        print("Pfizer FoundationOne Liquid AB1")
 
         for i in range(len(lines)):
             # print(lines[i])
@@ -1047,8 +1061,6 @@ def detectData_Pfizer(string, pdf,type_of_test):
 
         #print(custData)
         return custData
-
-    # If the sample is liquid or Liquid AB1
 
 def detectData_Roche(string, pdf,type_of_test):
     """
@@ -1578,7 +1590,191 @@ def detectData_Bristol(string,pdf,type_of_test):
 
     # print(custData)
     return custData
-  
+
+def detectData_Janssen(string, pdf, type_of_test):
+    """
+    Allow to extract info from Pfizer files
+    :Param: string, pdf, type_of_test
+    :return : Dictionary with all the elements extracted.
+    """
+    #Creamos una lista con las lineas separadas. 
+    lines = list(filter(None,string.split('\n')))
+    print(lines)
+    # print(lines)
+    custData = {} #Diccionario donde se van a ir guardando todas las variables
+    genes_pot, alts_pot = [], [] 
+    genenomic_findings, alts_findings = [], []
+    genomic_signatures, alts_signatures = [], []
+    unknown_signatures, alts_unknown = [], []
+    custData['File']=pdf
+    custData['TypeOftest']=type_of_test
+    first_iter=True
+
+
+    #print(lines)
+
+    #Vemos que tipo de FoundationOne es:
+    if 'Test Type FoundationOne DX1' in lines:
+        print("Janssen FoundationOne DX1")
+
+        for i in range(len(lines)):
+            print(lines[i])
+            if 'FMI Test Order #' in lines[i]:
+                if 'FMI_Test' not in custData:
+                    custData['FMI_Test'] = lines[i+1]
+            elif 'Subject ID' in lines[i]:
+                custData['Subjet'] = lines[i+1]
+            elif 'Test Type' in lines[i]:
+                custData['Test_Type'] = lines[i][10:]
+            elif 'Report Date' in lines[i]:
+                if 'Date' not in custData:
+                    if lines[i][12:]!="":
+                        custData['Date'] = lines[i][12:]
+                    else:
+                        custData['Date']=lines[i+1]
+            elif 'Partner Name' in lines[i]:
+                custData['Partner_Name']= lines[i][13:]        
+            elif 'Partner Study ID' in lines[i]:
+                custData['Partner_Study'] = lines[i][17:]
+            elif 'FMI Study ID' in lines[i]:
+                if 'TEST' not in lines[i+1]:
+                    custData['FMI_Study_ID'] = lines[i][13:]+lines[i+1]
+                else:
+                    custData['FMI_Study_ID'] = lines[i][13:]  
+            elif 'Site ID' in lines[i]:
+                custData['Site_ID'] = lines[i][8:]
+            elif 'Date of Birth' in lines[i]:
+                custData['Date_of_Birth'] = lines[i][14:]   
+            elif 'Diagnosis' in lines[i]:
+                custData['Diagnosis'] = lines[i][10:]
+            elif 'Specimen ID' in lines[i]:
+                custData['Specimen_ID'] = lines[i][12:]
+            elif 'Sample Type' in lines[i]:
+                custData['Sample_type'] = lines[i][12:]
+            elif 'Site' in lines[i]:
+                custData['Site'] = lines[i][5:]
+            elif 'Collection Date' in lines[i]:
+                custData['Collection_Date'] = lines[i][16:]
+            elif 'Received Date' in lines[i]:
+                custData['Received_Date'] = lines[i][14:]
+            elif 'Visit Type' in lines[i]:
+                custData['Visit_Type'] = lines[i][11:]
+            elif 'Unfortunately, we were not able' in lines[i]:
+                custData['Sample Failure']='Yes'
+            
+            #GENOMIC FINDINGS
+            elif "GENOMIC FINDINGS" in lines[i]:
+                #print(lines[i])
+                while lines[i]!='GENE':
+                    #print(lines[i])
+                    i+=1
+                try:
+                    i+=1
+                    while "ALTERATION" not in lines[i]: 
+                        if 'GENOMIC SIGNATURES' in lines[i]:
+                            i+=1
+                        else:
+                            genenomic_findings.append(lines[i])
+                            i+=1
+
+                    if "ALTERATION" in lines[i]:
+                        j=0
+                        i+=1
+                        #print(lines[i])
+                        while j<len(genenomic_findings):
+                            alts_findings.append(lines[i])
+                            i+=1
+                            j+=1
+                except:
+                    print("Error in Genomic Findings "+ pdf)
+
+            #Biomarker
+            elif 'GENOMIC SIGNATURES' in lines[i] and first_iter:
+                first_iter=False
+                try:
+                    while lines[i]!='Biomarker':
+                        i+=1
+
+                    i+=1
+                    while 'Result' not in lines[i]:
+                        if 'Not Evaluable' in lines[i]:
+                            genomic_signatures.append(lines[i][:-14] )
+                            alts_signatures.append(lines[i][-13:])
+                            i+=1
+                            
+                        else:
+                            genomic_signatures.append(lines[i])
+                            i+=1
+                        
+
+                    if "Result" in lines[i]:
+                        j=0
+                        i+=1
+                        #print(lines[i])
+                        if 'Electronically' in lines[i]:
+                            continue
+                        else:
+                            while j<len(genomic_signatures):
+                                alts_signatures.append(lines[i])
+                                j+=1
+                                i+=1
+                        
+                except:
+                    print("Error in genomic signatures "+pdf)
+                    
+            #Variants of unkwnon significance
+            elif "VARIANTS OF UNKNOWN SIGNIFICANCE" in lines[i]:
+                custData['Study Related']='No'
+                while lines[i]!='GENE':
+                    #print(lines[i])
+                    i+=1
+                try:
+                    i+=1
+                    while "ALTERATION" not in lines[i]: 
+                        #print(lines[i])
+                        unknown_signatures.append(lines[i]+"*")
+                        i+=1
+
+                    if "ALTERATION" in lines[i]:
+                        j=0
+                        i+=1
+                        #print(lines[i])
+                        while j<len(unknown_signatures):
+                            alts_unknown.append(lines[i])
+                            j+=1
+                            i+=1
+                except:
+                    print("Error in Genomic Findings "+pdf)  
+                    
+                    
+        #For genenomic_findings
+        for gene in genenomic_findings:
+            custData[gene] = "" #initialize a blank string to add to
+        for gene, alt in zip(genenomic_findings, alts_findings):
+            custData[gene] = custData[gene] + ";" + alt
+            custData[gene] = custData[gene].strip(";")
+            
+        #For genomic_signatures
+        for gene in genomic_signatures:
+            custData[gene] = "" #initialize a blank string to add to
+        for gene, alt in zip(genomic_signatures, alts_signatures):
+            custData[gene] = custData[gene] + ";" + alt
+            custData[gene] = custData[gene].strip(";")
+
+        #For unknown_signatures
+        for gene in unknown_signatures:
+            custData[gene] = "" #initialize a blank string to add to
+        for gene, alt in zip(unknown_signatures, alts_unknown):
+            custData[gene] = custData[gene] + ";" + alt
+            custData[gene] = custData[gene].strip(";") 
+        
+        print(custData)
+        return custData
+    
+    elif any("Janssen Study" in s for s in lines):
+        print("Janssen Study QUALIFIED")
+        pass 
+
                                
 def fundation_one_generator(dicts_fundation_one, pdfs): 
     """
