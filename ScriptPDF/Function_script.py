@@ -75,6 +75,10 @@ def detect_type_of_file(string, pdf):
     elif 'Janssen Study' in string:
         type_of_file='Janssen'
         return type_of_file
+
+    elif 'INVITAE DIAGNOSTIC TESTING RESULTS' in string:
+        type_of_file='Invitae'
+        return type_of_file       
     else:
          print('No contiene información sobre el Partner. ' + 'Nombre del archivo: '+ pdf )
 
@@ -118,6 +122,10 @@ def detectData(string, type_of_partner, pdf,TypeOftest):
     elif type_of_partner=='Janssen':
         # print("Detecto Janssen")
         return detectData_Janssen(string,pdf,TypeOftest)
+    elif type_of_partner=='Invitae':
+        # print("Detecto Bristol")
+        return detectData_Invitae(string,pdf,TypeOftest)
+
         
 
 def detect_Type_of_pdf(string, pdf):
@@ -150,9 +158,11 @@ def detect_Type_of_pdf(string, pdf):
             TypeOftest=''
         else:
             TypeOftest='T7_315_28'
-    elif 'Note: This is a QUALIFIED report. This specimen failed to meet minimum performance' in lines:
+    elif 'Note: This is a QUALIFIED report. This specimen failed to meet minimum performance' in lines or 'Janssen Study PCR3002 Clinical Trial Assay' in lines:
         TypeOftest='QUALIFIED'
-        
+
+    elif 'INVITAE DIAGNOSTIC TESTING RESULTS' in lines:
+        TypeOftest='Invitae'        
     if TypeOftest=="":
         TypeOftest="***Error in: ***"+pdf
         
@@ -1599,7 +1609,6 @@ def detectData_Janssen(string, pdf, type_of_test):
     """
     #Creamos una lista con las lineas separadas. 
     lines = list(filter(None,string.split('\n')))
-    print(lines)
     # print(lines)
     custData = {} #Diccionario donde se van a ir guardando todas las variables
     genes_pot, alts_pot = [], [] 
@@ -1618,7 +1627,7 @@ def detectData_Janssen(string, pdf, type_of_test):
         print("Janssen FoundationOne DX1")
 
         for i in range(len(lines)):
-            print(lines[i])
+            # print(lines[i])
             if 'FMI Test Order #' in lines[i]:
                 if 'FMI_Test' not in custData:
                     custData['FMI_Test'] = lines[i+1]
@@ -1768,14 +1777,180 @@ def detectData_Janssen(string, pdf, type_of_test):
             custData[gene] = custData[gene] + ";" + alt
             custData[gene] = custData[gene].strip(";") 
         
-        print(custData)
+        # print(custData)
         return custData
     
     elif any("Janssen Study" in s for s in lines):
         print("Janssen Study QUALIFIED")
-        pass 
+        custData['Test_Type'] = 'Janssen QUALIFIED'
+        custData['Partner_Name']= 'Janssen'
+        custData['Date_of_Birth'] = 'No-info'
+        custData['Sample_type'] = 'No-info'
+        custData['Site'] = 'No-info'
+        custData['Received_Date'] = 'No info'
+        custData['Visit_Type'] = 'No info'
+        for i in range(len(lines)):
+            # print(lines[i])
+            if 'FMI ID' in lines[i]:
+                if 'FMI_Test' not in custData:
+                    custData['FMI_Test'] = lines[i+1]
+            elif 'Subject ID' in lines[i]:
+                custData['Subjet'] = lines[i+1]
+            elif 'Report Date' in lines[i]:
+                if 'Date' not in custData:
+                    if lines[i][12:]!="":
+                        custData['Date'] = lines[i][12:]
+                    else:
+                        custData['Date']=lines[i+1]                     
+            elif 'Partner Study ID' in lines[i]:
+                custData['Partner_Study'] = lines[i][17:]
+            elif 'FMI Study ID' in lines[i]:
+                custData['FMI_Study_ID'] = lines[i][13:]  
+            elif 'Site ID' in lines[i]:
+                custData['Site_ID'] = lines[i][8:]         
+            elif 'Subject Diagnosis' in lines[i]:
+                custData['Diagnosis'] = lines[i][18:]
+            elif 'Specimen ID' in lines[i]:
+                custData['Specimen_ID'] = lines[i][12:]
+            elif 'Specimen Collection Date' in lines[i]:
+                custData['Collection_Date'] = lines[i][25:]            
+            elif 'Unfortunately, we were not able' in lines[i]:
+                custData['Sample Failure']='Yes'
 
-                               
+            elif "Stratification Information" in lines[i]:
+                #print(lines[i])
+                while lines[i]!='Criteria':
+                    #print(lines[i])
+                    i+=1
+                try:
+                    i+=1
+                    while "Variant Report" not in lines[i]: 
+                        genenomic_findings.append(lines[i])
+                        i+=1
+                        # print(genenomic_findings)
+
+                    if "GENE" in lines[i+1]:
+                        j=0
+                        i+=1
+                        while 'Status' not in lines[i]:
+                            if 'GENE' in lines[i]:
+                                i+=1
+                            else:
+                                genenomic_findings.append(lines[i])
+                                i+=1
+                                # print(genenomic_findings)
+
+                        i+=1
+                        while 'ALTERATION' not in lines[i]:
+                            alts_findings.append(lines[i])
+                            i+=1
+                            j+=1
+                        i+=1
+                        while j<len(genenomic_findings):
+                            alts_findings.append(lines[i])
+                            i+=1
+                            j+=1
+                        # print(alts_findings)
+                except:
+                    print("Error in Genomic Findings "+ pdf)
+
+                number=len(lines)
+                while i < len(lines):
+                    if 'None' not in lines[i]:
+                        i+=1
+                    else: 
+                        custData['Sample Failure']='Check the file'
+                        i+=1
+
+                     
+
+        
+        #For genenomic_findings
+        for gene in genenomic_findings:
+            custData[gene] = "" #initialize a blank string to add to
+        for gene, alt in zip(genenomic_findings, alts_findings):
+            custData[gene] = custData[gene] + ";" + alt
+            custData[gene] = custData[gene].strip(";")
+        
+        
+        # print(custData)
+        return custData
+    else:
+        print("Detected a type on Janssen that we don't know it.")
+
+def detectData_Invitae(string,pdf,type_of_test):
+    """
+    Allow to extract info from Invitae files
+    :Param: string, pdf, type_of_test
+    :return : Dictionary with all the elements extracted.
+    """
+    #Creamos una lista con las lineas separadas. 
+    lines = list(filter(None,string.split('\n')))
+    print(lines)
+    custData = {} #Diccionario donde se van a ir guardando todas las variables
+    genes_pot, alts_pot = [], [] 
+    genenomic_findings, alts_findings = [], []
+    genomic_signatures, alts_signatures = [], []
+    unknown_signatures, alts_unknown = [], []
+    custData['File']=pdf
+    custData['TypeOftest']=type_of_test
+    first_iter=True
+
+    if 'INVITAE DIAGNOSTIC TESTING RESULTS' in lines:
+        pass
+        print("Invitae")
+        if 'RESULT: NEGATIVE' in lines:
+            for i in range(len(lines)):
+                # print(lines[i])
+                if 'Invitae #:' in lines[i]:
+                    if 'FMI_Test' not in custData:
+                        custData['FMI_Test'] = lines[i+3]
+                # elif 'Subject ID' in lines[i]:
+                #     custData['Subjet'] = lines[i+1]
+                # elif 'Test Type' in lines[i]:
+                #     custData['Test_Type'] = lines[i][10:]
+                elif 'Report date' in lines[i]:
+                    if 'Date' not in custData:
+                        custData['Date']=lines[i+3]
+                elif 'Partner Name' in lines[i]:
+                    custData['Partner_Name']= lines[i][13:]        
+                elif 'Partner Study ID' in lines[i]:
+                    custData['Partner_Study'] = lines[i][17:]
+                elif 'FMI Study ID' in lines[i]:
+                    if 'TEST' not in lines[i+1]:
+                        custData['FMI_Study_ID'] = lines[i][13:]+lines[i+1]
+                    else:
+                        custData['FMI_Study_ID'] = lines[i][13:]  
+                elif 'Site ID' in lines[i]:
+                    custData['Site_ID'] = lines[i][8:]
+                elif 'Date of Birth' in lines[i]:
+                    custData['Date_of_Birth'] = lines[i][14:]   
+                elif 'Diagnosis' in lines[i]:
+                    custData['Diagnosis'] = lines[i][10:]
+                elif 'Specimen ID' in lines[i]:
+                    custData['Specimen_ID'] = lines[i][12:]
+                elif 'Sample Type' in lines[i]:
+                    custData['Sample_type'] = lines[i][12:]
+                elif 'Site' in lines[i]:
+                    custData['Site'] = lines[i][5:]
+                elif 'Collection Date' in lines[i]:
+                    custData['Collection_Date'] = lines[i][16:]
+                elif 'Received Date' in lines[i]:
+                    custData['Received_Date'] = lines[i][14:]
+                elif 'Visit Type' in lines[i]:
+                    custData['Visit_Type'] = lines[i][11:]
+                elif 'Unfortunately, we were not able' in lines[i]:
+                    custData['Sample Failure']='Yes'   
+        elif 'RESULT: UNCERTAIN':
+            pass
+        else:
+            print('Invitae Diagnostic Results Error in: ', pdf)
+    else:
+        print('Invitae files incorrect formart ', pdf)
+def detectData_Caris(string,pdf,type_of_test):
+    pass
+
+
 def fundation_one_generator(dicts_fundation_one, pdfs): 
     """
     Create a excel file with the data extracted previously. 
