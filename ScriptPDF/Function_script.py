@@ -1854,7 +1854,6 @@ def detectData_Janssen(string, pdf, type_of_test):
                 except:
                     print("Error in Genomic Findings "+ pdf)
 
-                number=len(lines)
                 while i < len(lines):
                     if 'None' not in lines[i]:
                         i+=1
@@ -1862,9 +1861,6 @@ def detectData_Janssen(string, pdf, type_of_test):
                         custData['Sample Failure']='Check the file'
                         i+=1
 
-                     
-
-        
         #For genenomic_findings
         for gene in genenomic_findings:
             custData[gene] = "" #initialize a blank string to add to
@@ -1897,7 +1893,6 @@ def detectData_Invitae(string,pdf,type_of_test):
     first_iter=True
 
     if 'INVITAE DIAGNOSTIC TESTING RESULTS' in lines:
-        pass
         print("Invitae")
         if 'RESULT: NEGATIVE' in lines:
             for i in range(len(lines)):
@@ -1905,6 +1900,15 @@ def detectData_Invitae(string,pdf,type_of_test):
                 if 'Invitae #:' in lines[i]:
                     if 'FMI_Test' not in custData:
                         custData['FMI_Test'] = lines[i+3]
+                        custData['Subjet'] = 'No data'
+                        custData['Test_Type'] = 'No data'
+                        custData['Partner_Name']= 'Invitae'
+                        custData['Partner_Study'] = 'No data'
+                        custData['FMI_Study_ID'] = 'No data'
+                        custData['Site_ID'] = 'No data'
+                        custData['Diagnosis'] = 'No data'
+                        custData['Specimen_ID'] = 'No data'
+                        custData['Site'] = 'No data'
                 # elif 'Subject ID' in lines[i]:
                 #     custData['Subjet'] = lines[i+1]
                 # elif 'Test Type' in lines[i]:
@@ -1912,44 +1916,129 @@ def detectData_Invitae(string,pdf,type_of_test):
                 elif 'Report date' in lines[i]:
                     if 'Date' not in custData:
                         custData['Date']=lines[i+3]
-                elif 'Partner Name' in lines[i]:
-                    custData['Partner_Name']= lines[i][13:]        
-                elif 'Partner Study ID' in lines[i]:
-                    custData['Partner_Study'] = lines[i][17:]
-                elif 'FMI Study ID' in lines[i]:
-                    if 'TEST' not in lines[i+1]:
-                        custData['FMI_Study_ID'] = lines[i][13:]+lines[i+1]
-                    else:
-                        custData['FMI_Study_ID'] = lines[i][13:]  
-                elif 'Site ID' in lines[i]:
-                    custData['Site_ID'] = lines[i][8:]
-                elif 'Date of Birth' in lines[i]:
-                    custData['Date_of_Birth'] = lines[i][14:]   
-                elif 'Diagnosis' in lines[i]:
-                    custData['Diagnosis'] = lines[i][10:]
-                elif 'Specimen ID' in lines[i]:
-                    custData['Specimen_ID'] = lines[i][12:]
-                elif 'Sample Type' in lines[i]:
-                    custData['Sample_type'] = lines[i][12:]
-                elif 'Site' in lines[i]:
-                    custData['Site'] = lines[i][5:]
-                elif 'Collection Date' in lines[i]:
-                    custData['Collection_Date'] = lines[i][16:]
-                elif 'Received Date' in lines[i]:
-                    custData['Received_Date'] = lines[i][14:]
-                elif 'Visit Type' in lines[i]:
-                    custData['Visit_Type'] = lines[i][11:]
-                elif 'Unfortunately, we were not able' in lines[i]:
-                    custData['Sample Failure']='Yes'   
+                # elif 'Partner Name' in lines[i]:
+                #     custData['Partner_Name']= lines[i][13:]        
+                # elif 'Partner Study ID' in lines[i]:
+                #     custData['Partner_Study'] = lines[i][17:]
+                # elif 'FMI Study ID' in lines[i]:
+                #     if 'TEST' not in lines[i+1]:
+                #         custData['FMI_Study_ID'] = lines[i][13:]+lines[i+1]
+                #     else:
+                #         custData['FMI_Study_ID'] = lines[i][13:]  
+                # elif 'Site ID' in lines[i]:
+                #     custData['Site_ID'] = lines[i][8:]
+                elif 'DOB:' in lines[i]:
+                    if 'Date_of_Birth' not in custData:
+                        custData['Date_of_Birth'] = lines[i+4] 
+                # elif 'Diagnosis' in lines[i]:
+                #     custData['Diagnosis'] = lines[i][10:]
+                # elif 'Specimen ID' in lines[i]:
+                #     custData['Specimen_ID'] = lines[i][12:]
+                elif 'Sample type:' in lines[i]:
+                    if 'Sample_type' not in custData:
+                        custData['Sample_type'] = lines[i+3]
+                # elif 'Site' in lines[i]:
+                #     custData['Site'] = lines[i][5:]
+                elif 'Sample collection date:' in lines[i]:
+                    if 'Collection_Date' not in custData:
+                        custData['Collection_Date'] = lines[i+3]
+                elif 'Report date:' in lines[i]:
+                    custData['Received_Date'] = lines[i+3]
+                # elif 'Visit Type' in lines[i]:
+                #     custData['Visit_Type'] = lines[i][11:]
+                # elif 'Unfortunately, we were not able' in lines[i]:
+                #     custData['Sample Failure']='Yes'   
+            
+            return custData
         elif 'RESULT: UNCERTAIN':
-            pass
+            for i in range(len(lines)):
+                # print(lines[i])
+                if 'Invitae #:' in lines[i]:
+                    if 'FMI_Test' not in custData:
+                        custData['FMI_Test'] = lines[i+3]
+                        custData['Subjet'] = 'No data'
+                        custData['Test_Type'] = 'No data'
+                        custData['Partner_Name']= 'Invitae'
+                        custData['Partner_Study'] = 'No data'
+                        custData['FMI_Study_ID'] = 'No data'
+                        custData['Site_ID'] = 'No data'
+                        custData['Diagnosis'] = 'No data'
+                        custData['Specimen_ID'] = 'No data'
+                        custData['Site'] = 'No data'
+                # elif 'Subject ID' in lines[i]:
+                #     custData['Subjet'] = lines[i+1]
+                # elif 'Test Type' in lines[i]:
+                #     custData['Test_Type'] = lines[i][10:]
+                elif 'Report date' in lines[i]:
+                    if 'Date' not in custData:
+                        custData['Date']=lines[i+3]
+                # elif 'Partner Name' in lines[i]:
+                #     custData['Partner_Name']= lines[i][13:]        
+                # elif 'Partner Study ID' in lines[i]:
+                #     custData['Partner_Study'] = lines[i][17:]
+                # elif 'FMI Study ID' in lines[i]:
+                #     if 'TEST' not in lines[i+1]:
+                #         custData['FMI_Study_ID'] = lines[i][13:]+lines[i+1]
+                #     else:
+                #         custData['FMI_Study_ID'] = lines[i][13:]  
+                # elif 'Site ID' in lines[i]:
+                #     custData['Site_ID'] = lines[i][8:]
+                elif 'DOB:' in lines[i]:
+                    if 'Date_of_Birth' not in custData:
+                        custData['Date_of_Birth'] = lines[i+4] 
+                # elif 'Diagnosis' in lines[i]:
+                #     custData['Diagnosis'] = lines[i][10:]
+                # elif 'Specimen ID' in lines[i]:
+                #     custData['Specimen_ID'] = lines[i][12:]
+                elif 'Sample type:' in lines[i]:
+                    if 'Sample_type' not in custData:
+                        custData['Sample_type'] = lines[i+3]
+                # elif 'Site' in lines[i]:
+                #     custData['Site'] = lines[i][5:]
+                elif 'Sample collection date:' in lines[i]:
+                    if 'Collection_Date' not in custData:
+                        custData['Collection_Date'] = lines[i+3]
+                elif 'Report date:' in lines[i]:
+                    custData['Received_Date'] = lines[i+3]
+                # elif 'Visit Type' in lines[i]:
+                #     custData['Visit_Type'] = lines[i][11:]
+                # elif 'Unfortunately, we were not able' in lines[i]:
+                #     custData['Sample Failure']='Yes' 
+
+                elif "Variant(s) of Uncertain Significance identified." in lines[i]:
+                    #print(lines[i])
+                    while lines[i]!='GENE':
+                        print(lines[i])
+                        i+=1
+                    try:
+                        while "VARIANT" not in lines[i]: 
+                            genenomic_findings.append(lines[i])
+                            i+=1
+                            # print(genenomic_findings)
+
+                        while "ZYGOSITY" not in lines[i]: 
+                            alts_findings.append(lines[i])
+                            i+=1
+                            # print(genenomic_findings)
+                    except:
+                        print("Error in Genomic Findings "+ pdf)
+
+
+            #For genenomic_findings
+            for gene in genenomic_findings:
+                custData[gene] = "" #initialize a blank string to add to
+            for gene, alt in zip(genenomic_findings, alts_findings):
+                custData[gene] = custData[gene] + ";" + alt
+                custData[gene] = custData[gene].strip(";")
+            print(custData)
+            return custData    
         else:
             print('Invitae Diagnostic Results Error in: ', pdf)
     else:
         print('Invitae files incorrect formart ', pdf)
+
 def detectData_Caris(string,pdf,type_of_test):
     pass
-
 
 def fundation_one_generator(dicts_fundation_one, pdfs): 
     """
