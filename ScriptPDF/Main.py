@@ -15,8 +15,8 @@ if __name__ == '__main__':
     #path of folder containing several PDFs
     
     #path = r'/Users/enriq/Dropbox/Lector_adobe/PDF/' 
-    # path= r'C:/Users/enriq/OneDrive - UNIVERSIDAD DE MURCIA/PDF_Reader/Archivos/New files'
-    path= r'C:/Users/eperez2/OneDrive - UNIVERSIDAD DE MURCIA/PDF_Reader/Archivos/New files'
+    path= r'C:/Users/enriq/OneDrive - UNIVERSIDAD DE MURCIA/PDF_Reader/Archivos/New files'
+    # path= r'C:/Users/eperez2/OneDrive - UNIVERSIDAD DE MURCIA/PDF_Reader/Archivos/New files'
 
     # path= r'/Users/pax-32/Dropbox/Lector_adobe/PDF/'
     #path = r'/home/eperez/Documents/PDF_Reader/PDF'
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     dicts_Unknown=[] 
     for pdf in pdfs:
         string = convert_pdf_to_txt(pdf)
-        #print(string)
+        print(string)
         Type_of_pdf=detect_Type_of_pdf(string, pdf)
         type_of_Partner=detect_type_of_file(string, pdf)
 
