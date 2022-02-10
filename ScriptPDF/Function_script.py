@@ -2134,9 +2134,186 @@ def detectData_Caris(string,pdf,type_of_test):
 
         # print(custData)
         return custData
-    elif 'There is insufficient tumor for sequencing studies.' in lines:  
-        print('test 2')
-        pass
+    elif 'e N R G y   C L I N I C A L   T R I A L   F U S I O N   A N A L Y S I S' in lines:  
+        for i in range(len(lines)):
+            # print(lines[i])
+            if 'Case Number:' in lines[i]:
+                if 'FMI_Test' not in custData:
+                    custData['FMI_Test'] = lines[i][13:]
+                    custData['Subjet'] = lines[i][13:]
+                    custData['Test_Type'] = 'No info'
+                    custData['Partner_Name']= 'No info'
+                    custData['Partner_Study'] = 'No info'
+                    custData['FMI_Study_ID'] ='No info'
+                    custData['Received_Date'] = 'No info'
+                    custData['Visit_Type'] = 'No info'
+                    custData['Sample Failure']='No'
+            # elif 'Subject ID' in lines[i]:
+            #     if 'Subjet' not in custData:
+            #         custData['Subjet'] = lines[i+1]
+            # elif 'Test Type' in lines[i]:
+            #     custData['Test_Type'] = lines[i][10:]
+            # elif 'Partner Name' in lines[i]:
+            #     custData['Partner_Name']= lines[i][13:]        
+            # elif 'Partner Study ID' in lines[i]:
+            #     custData['Partner_Study'] = lines[i][17:]
+            # elif 'FMI Study ID' in lines[i]:
+            #     custData['FMI_Study_ID'] = lines[i][13:]  
+            elif 'Test Report Date:' in lines[i]:
+                custData['Date'] = lines[i][17:]
+            # elif 'Site ID' in lines[i]:
+            #     custData['Site_ID'] = lines[i][8:]
+            elif 'Date of Birth:' in lines[i]:
+                custData['Date_of_Birth'] = lines[i][15:]   
+            elif 'Diagnosis:' in lines[i]:
+                if 'Diagnosis' not in custData:
+                    custData['Diagnosis'] = lines[i][12:]
+            elif 'Specimen ID:' in lines[i]:
+                if 'Specimen_ID' not in custData:
+                    custData['Specimen_ID'] = lines[i][13:]
+            elif 'Primary Tumor Site:' in lines[i]:
+                if 'Sample_type' not in custData:
+                    custData['Sample_type'] = lines[i][20:]
+            elif 'Specimen Site:' in lines[i]:
+                if 'Site' not in custData:
+                    custData['Site'] = lines[i][15:]
+            elif 'Specimen Collected:' in lines[i]:
+                if 'Collection_Date' not in custData:
+                    custData['Collection_Date'] = lines[i][20:]
+            # elif 'Received Date' in lines[i]:
+            #     custData['Received_Date'] = lines[i][14:]
+            elif 'Sex:' in lines[i]:
+                if 'Sex' not in custData:
+                    custData['Sex'] = lines[i][4:]
+            # elif 'Visit Type' in lines[i]:
+            #     custData['Visit_Type'] = lines[i][11:]
+            # elif 'Unfortunately, we were not able' in lines[i]:
+            #     custData['Sample Failure']='Yes'
+                    #GENOMIC FINDINGS
+            # elif "e N R G y   C L I N I C A L" in lines[i]:
+            #     #print(lines[i])
+            #     try:
+            #         while lines[i]!='Gene':
+            #             #print(lines[i])
+            #             i+=1
+            #             genenomic_findings.append(lines[i])
+
+            #         while "ALTERATION" not in lines[i]: 
+            #             genenomic_findings.append(lines[i])
+            #             i+=1
+
+            #         if "ALTERATION" in lines[i]:
+            #             j=0
+            #             i+=1
+            #             #print(lines[i])
+            #             while j<len(genenomic_findings):
+            #                 alts_findings.append(lines[i])
+            #                 j+=1
+            #                 i+=1
+            #     except:
+            #         print("Error in Genomic Findings " + pdf)
+
+            #Biomarker
+            elif 'Cancer-Type Relevant Biomarkers' in lines[i]:
+                try:
+                    j=0 #Counter for iterations
+                    while 'Biomarker' in lines[i] or 'Method'in lines[i] or 'Analyte' in lines[i] or 'Result' in lines[i]:
+                        i+=1
+                    
+                    while 'Seq' not in lines[i]:
+                        if 'Burden' in lines[i]:
+                            i+=1
+                        else:
+                            genenomic_findings.append(lines[i])
+                            # print(genomic_signatures)
+                            i+=1
+
+                    while 'Seq' in lines[i]:
+                        i+=1
+                    while j<len(genenomic_findings):
+
+                        if "DNA-Tumor" in lines[i] or 'RNA-Tumor' in lines[i]:
+                            i+=1
+                        else:
+                            if 'Detected' in lines[i]: #Hay veces que hace un salto de linea y la cuenta como otra fila. 
+                                i+=1
+                            else:
+                                alts_findings.append(lines[i])
+                                i+=1
+                                j+=1
+                    
+                    counter=0
+                    while 'Seq' not in lines[i]:
+                        counter+=1
+                        test=lines[i]
+                        i+=1
+                    else:
+                        i=i-counter
+                        while 'Seq' not in lines[i]:
+                            if 'Burden' in lines[i]:
+                                i+=1
+                            else:
+                                genenomic_findings.append(lines[i])
+                                # print(genomic_signatures)
+                                i+=1
+                    while 'Seq' in lines[i]:
+                        i+=1
+                    while j<len(genenomic_findings):
+                        if "DNA-Tumor" in lines[i] or 'RNA-Tumor' in lines[i]:
+                            i+=1
+                        else:
+                            if 'Detected' in lines[i]: #Hay veces que hace un salto de linea y la cuenta como otra fila. 
+                                i+=1
+                            else:
+                                alts_findings.append(lines[i])
+                                i+=1
+                                j+=1
+
+                    #For genenomic_findings
+                    for gene in genenomic_findings:
+                        custData[gene] = "" #initialize a blank string to add to
+                    for gene, alt in zip(genenomic_findings, alts_findings):
+                        custData[gene] = custData[gene] + ";" + alt
+                        custData[gene] = custData[gene].strip(";")
+                    # print(custData)  
+                except:
+                    print("Error in genomic signatures " +pdf )
+
+            elif 'Genomic Signatures' in lines[i]:
+                j=0 #Reiniciamos contador
+                while 'Analyte' not in lines[i]:
+                    i+=1
+                
+                while 'Result' not in lines[i]:
+                    
+                    if lines[i]=='Microsatellite':
+                        i+=2
+                        genomic_signatures.append('Microsatellite Instability')
+                    elif lines[i]=='Tumor Mutational':
+                        i+=2
+                        genomic_signatures.append('Tumor Mutational Burden')
+                    elif lines[i]=='Genomic Loss of':
+                        i+=2
+                        genomic_signatures.append('Loss of Heterozygosity score')
+                    else:
+                        # genomic_signatures.append(lines[i])
+                        i+=1
+                
+                
+                while j<len(genomic_signatures):
+                    alts_signatures.append(lines[i])
+                    j+=1
+                    i+=1
+                
+                print(genomic_signatures)
+                print(alts_signatures)
+
+                    
+
+
+                    
+
+
     else:
         print('Error in format')
 
