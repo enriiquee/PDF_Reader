@@ -77,12 +77,21 @@ def detect_type_of_file(string, pdf):
         return type_of_file
     
     elif 'MERUS' in string:
-        type_of_file='Caris'
-        return type_of_file
+        if 'PathGroup Oncology' in string or 'Endeavor' in string or 'NGS Expanded Solid Tumor Panel' in string:
+            type_of_file='PathGroup'  
+            return type_of_file  
+        else:
+            type_of_file='Caris'
+            return type_of_file
 
     elif 'INVITAE DIAGNOSTIC TESTING RESULTS' in string:
         type_of_file='Invitae'
-        return type_of_file       
+        return type_of_file  
+
+    elif 'PathGroup Oncology' in string or 'Endeavor' in string or 'NGS Expanded Solid Tumor Panel' in string:
+        print('Entro')
+        type_of_file='PathGroup'  
+        return type_of_file  
     else:
          print('No contiene información sobre el Partner. ' + 'Nombre del archivo: '+ pdf )
         # Eliminamos las tabulaciones. 
@@ -131,6 +140,9 @@ def detectData(string, type_of_partner, pdf,TypeOftest):
     elif type_of_partner=='Caris':
         # print("Detecto Bristol")
         return detectData_Caris(string,pdf,TypeOftest)
+    elif type_of_partner=='PathGroup':
+        # print("Detecto PathGroup")
+        return detectData_PathGroup(string,pdf,TypeOftest)        
 
 def detect_Type_of_pdf(string, pdf):
     """"
@@ -2075,7 +2087,7 @@ def detectData_Caris(string,pdf,type_of_test):
 
     #We do the classification between the different formas of caris        
     if 'There is insufficient tumor for sequencing studies.' in lines:  
-        print("Caris")
+        print("Caris No Info")
 
         for i in range(len(lines)):
             # print(lines[i])
@@ -2108,8 +2120,10 @@ def detectData_Caris(string,pdf,type_of_test):
             elif 'Date of Birth:' in lines[i]:
                 custData['Date_of_Birth'] = lines[i][15:]   
             elif 'Diagnosis:' in lines[i]:
+                # print('Dentro')
                 if 'Diagnosis' not in custData:
                     custData['Diagnosis'] = lines[i][12:]
+                    # print(custData['Diagnosis'])
             elif 'Specimen ID:' in lines[i]:
                 if 'Specimen_ID' not in custData:
                     custData['Specimen_ID'] = lines[i][13:]
@@ -2134,7 +2148,8 @@ def detectData_Caris(string,pdf,type_of_test):
 
         # print(custData)
         return custData
-    elif 'e N R G y   C L I N I C A L   T R I A L   F U S I O N   A N A L Y S I S' in lines:  
+    elif 'e N R G y   C L I N I C A L   T R I A L   F U S I O N   A N A L Y S I S' in lines and not 'There is insufficient tumor for sequencing studies.' in lines:  
+        print('Caris')
         for i in range(len(lines)):
             # print(lines[i])
             if 'Case Number:' in lines[i]:
@@ -2213,110 +2228,310 @@ def detectData_Caris(string,pdf,type_of_test):
             #     except:
             #         print("Error in Genomic Findings " + pdf)
 
-            #Biomarker
-            elif 'Cancer-Type Relevant Biomarkers' in lines[i]:
-                try:
-                    j=0 #Counter for iterations
-                    while 'Biomarker' in lines[i] or 'Method'in lines[i] or 'Analyte' in lines[i] or 'Result' in lines[i]:
-                        i+=1
+            # #Biomarker
+            # elif 'Cancer-Type Relevant Biomarkers' in lines[i]:
+                # try:
+            #         j=0 #Counter for iterations
+            #         while 'Biomarker' in lines[i] or 'Method'in lines[i] or 'Analyte' in lines[i] or 'Result' in lines[i]:
+            #             i+=1
                     
-                    while 'Seq' not in lines[i]:
-                        if 'Burden' in lines[i]:
-                            i+=1
-                        else:
-                            genenomic_findings.append(lines[i])
-                            # print(genomic_signatures)
-                            i+=1
+            #         while 'Seq' not in lines[i]:
+            #             if 'Burden' in lines[i]:
+            #                 i+=1
+            #             else:
+            #                 genenomic_findings.append(lines[i])
+            #                 # print(genomic_signatures)
+            #                 i+=1
 
-                    while 'Seq' in lines[i]:
-                        i+=1
-                    while j<len(genenomic_findings):
+            #         while 'Seq' in lines[i]:
+            #             i+=1
+            #         while j<len(genenomic_findings):
 
-                        if "DNA-Tumor" in lines[i] or 'RNA-Tumor' in lines[i]:
-                            i+=1
-                        else:
-                            if 'Detected' in lines[i]: #Hay veces que hace un salto de linea y la cuenta como otra fila. 
-                                i+=1
-                            else:
-                                alts_findings.append(lines[i])
-                                i+=1
-                                j+=1
+            #             if "DNA-Tumor" in lines[i] or 'RNA-Tumor' in lines[i]:
+            #                 i+=1
+            #             else:
+            #                 if 'Detected' in lines[i]: #Hay veces que hace un salto de linea y la cuenta como otra fila. 
+            #                     i+=1
+            #                 else:
+            #                     alts_findings.append(lines[i])
+            #                     i+=1
+            #                     j+=1
                     
-                    counter=0
-                    while 'Seq' not in lines[i]:
-                        counter+=1
-                        test=lines[i]
-                        i+=1
-                    else:
-                        i=i-counter
-                        while 'Seq' not in lines[i]:
-                            if 'Burden' in lines[i]:
-                                i+=1
-                            else:
-                                genenomic_findings.append(lines[i])
-                                # print(genomic_signatures)
-                                i+=1
-                    while 'Seq' in lines[i]:
-                        i+=1
-                    while j<len(genenomic_findings):
-                        if "DNA-Tumor" in lines[i] or 'RNA-Tumor' in lines[i]:
-                            i+=1
-                        else:
-                            if 'Detected' in lines[i]: #Hay veces que hace un salto de linea y la cuenta como otra fila. 
-                                i+=1
-                            else:
-                                alts_findings.append(lines[i])
-                                i+=1
-                                j+=1
+            #         counter=0
+            #         while 'Seq' not in lines[i]:
+            #             counter+=1
+            #             test=lines[i]
+            #             i+=1
+            #         else:
+            #             i=i-counter
+            #             while 'Seq' not in lines[i]:
+            #                 if 'Burden' in lines[i]:
+            #                     i+=1
+            #                 else:
+            #                     genenomic_findings.append(lines[i])
+            #                     # print(genomic_signatures)
+            #                     i+=1
+            #         while 'Seq' in lines[i]:
+            #             i+=1
+            #         while j<len(genenomic_findings):
+            #             if "DNA-Tumor" in lines[i] or 'RNA-Tumor' in lines[i]:
+            #                 i+=1
+            #             else:
+            #                 if 'Detected' in lines[i]: #Hay veces que hace un salto de linea y la cuenta como otra fila. 
+            #                     i+=1
+            #                 else:
+            #                     alts_findings.append(lines[i])
+            #                     i+=1
+            #                     j+=1
 
-                    #For genenomic_findings
-                    for gene in genenomic_findings:
-                        custData[gene] = "" #initialize a blank string to add to
-                    for gene, alt in zip(genenomic_findings, alts_findings):
-                        custData[gene] = custData[gene] + ";" + alt
-                        custData[gene] = custData[gene].strip(";")
-                    # print(custData)  
-                except:
-                    print("Error in genomic signatures " +pdf )
+            #         #For genenomic_findings
+            #         for gene in genenomic_findings:
+            #             custData[gene] = "" #initialize a blank string to add to
+            #         for gene, alt in zip(genenomic_findings, alts_findings):
+            #             custData[gene] = custData[gene] + ";" + alt
+            #             custData[gene] = custData[gene].strip(";")
+            #         # print(custData)  
+                # except:
+                #     print("Error in genomic signatures " +pdf )
 
-            elif 'Genomic Signatures' in lines[i]:
-                j=0 #Reiniciamos contador
-                while 'Analyte' not in lines[i]:
-                    i+=1
+            # elif 'Genomic Signatures' in lines[i]:
+            #     j=0 #Reiniciamos contador
+            #     while 'Analyte' not in lines[i]:
+            #         i+=1
                 
-                while 'Result' not in lines[i]:
+            #     while 'Result' not in lines[i]:
                     
-                    if lines[i]=='Microsatellite':
-                        i+=2
-                        genomic_signatures.append('Microsatellite Instability')
-                    elif lines[i]=='Tumor Mutational':
-                        i+=2
-                        genomic_signatures.append('Tumor Mutational Burden')
-                    elif lines[i]=='Genomic Loss of':
-                        i+=2
-                        genomic_signatures.append('Loss of Heterozygosity score')
-                    else:
-                        # genomic_signatures.append(lines[i])
-                        i+=1
+            #         if lines[i]=='Microsatellite':
+            #             i+=2
+            #             genomic_signatures.append('Microsatellite Instability')
+            #         elif lines[i]=='Tumor Mutational':
+            #             i+=2
+            #             genomic_signatures.append('Tumor Mutational Burden')
+            #         elif lines[i]=='Genomic Loss of':
+            #             i+=2
+            #             genomic_signatures.append('Loss of Heterozygosity score')
+            #         else:
+            #             # genomic_signatures.append(lines[i])
+            #             i+=1
                 
                 
-                while j<len(genomic_signatures):
-                    alts_signatures.append(lines[i])
-                    j+=1
-                    i+=1
-                
-                print(genomic_signatures)
-                print(alts_signatures)
-
-                    
-
-
-                    
-
-
+            #     while j<len(genomic_signatures):
+            #         alts_signatures.append(lines[i])
+            #         j+=1
+            #         i+=1
+        return custData        
+    elif 'Results with Therapy Associations' in lines and 'There is insufficient tumor for sequencing studies.' not in lines:  
+        print('Caris')
+        for i in range(len(lines)):
+            # print(lines[i])
+            if 'Case Number:' in lines[i]:
+                if 'FMI_Test' not in custData:
+                    custData['FMI_Test'] = lines[i][13:]
+                    custData['Subjet'] = lines[i][13:]
+                    custData['Test_Type'] = 'No info'
+                    custData['Partner_Name']= 'No info'
+                    custData['Partner_Study'] = 'No info'
+                    custData['FMI_Study_ID'] ='No info'
+                    custData['Received_Date'] = 'No info'
+                    custData['Visit_Type'] = 'No info'
+                    custData['Sample Failure']='No'
+            # elif 'Subject ID' in lines[i]:
+            #     if 'Subjet' not in custData:
+            #         custData['Subjet'] = lines[i+1]
+            # elif 'Test Type' in lines[i]:
+            #     custData['Test_Type'] = lines[i][10:]
+            # elif 'Partner Name' in lines[i]:
+            #     custData['Partner_Name']= lines[i][13:]        
+            # elif 'Partner Study ID' in lines[i]:
+            #     custData['Partner_Study'] = lines[i][17:]
+            # elif 'FMI Study ID' in lines[i]:
+            #     custData['FMI_Study_ID'] = lines[i][13:]  
+            elif 'Test Report Date:' in lines[i]:
+                custData['Date'] = lines[i][17:]
+            # elif 'Site ID' in lines[i]:
+            #     custData['Site_ID'] = lines[i][8:]
+            elif 'Date of Birth:' in lines[i]:
+                custData['Date_of_Birth'] = lines[i][15:]   
+            elif 'Diagnosis:' in lines[i]:
+                if 'Diagnosis' not in custData:
+                    custData['Diagnosis'] = lines[i][12:]
+            elif 'Specimen ID:' in lines[i]:
+                if 'Specimen_ID' not in custData:
+                    custData['Specimen_ID'] = lines[i][13:]
+            elif 'Primary Tumor Site:' in lines[i]:
+                if 'Sample_type' not in custData:
+                    custData['Sample_type'] = lines[i][20:]
+            elif 'Specimen Site:' in lines[i]:
+                if 'Site' not in custData:
+                    custData['Site'] = lines[i][15:]
+            elif 'Specimen Collected:' in lines[i]:
+                if 'Collection_Date' not in custData:
+                    custData['Collection_Date'] = lines[i][20:]
+            # elif 'Received Date' in lines[i]:
+            #     custData['Received_Date'] = lines[i][14:]
+            elif 'Sex:' in lines[i]:
+                if 'Sex' not in custData:
+                    custData['Sex'] = lines[i][4:]        
+        return custData
     else:
-        print('Error in format')
+        print('Caris files incorrect formart ', pdf)
 
+def detectData_PathGroup(string,pdf,type_of_test):
+    """
+    Extract the data from PathGroups files
+    """
+
+    #Creamos una lista con las lineas separadas. 
+    lines = list(filter(None,string.split('\n')))
+   
+    custData = {} #Diccionario donde se van a ir guardando todas las variables
+    genes_pot, alts_pot = [], [] 
+    Enrollment_gene, Enrollment_alt=[],[]
+    genenomic_findings, alts_findings = [], []
+    genomic_signatures, alts_signatures = [], []
+    unknown_signatures, alts_unknown = [], []
+    custData['File']=pdf    
+    custData['TypeOftest']='PathGroup'
+    
+    if 'PathGroup Oncology' in lines:
+        print('PathGroups Not Detected')
+        for i in range(len(lines)):
+            if 'Accession #:' in lines[i]:
+                if 'FMI_Test' not in custData:
+                    custData['FMI_Test'] = lines[i][13:]
+                    custData['Subjet'] = lines[i][13:]
+                    custData['Test_Type'] = 'No info'
+                    custData['Partner_Name']= 'No info'
+                    custData['Partner_Study'] = 'No info'
+                    custData['FMI_Study_ID'] ='No info'
+                    custData['Received_Date'] = 'No info'
+                    custData['Visit_Type'] = 'No info'
+                    custData['Diagnosis'] = 'No info'
+                    custData['Specimen_ID'] = 'No info'
+                    custData['Sample_type'] = 'No info'
+                    custData['Site'] = 'No info'
+                    custData['Sex'] = 'No info'
+            # elif 'Subject ID' in lines[i]:
+            #     if 'Subjet' not in custData:
+            #         custData['Subjet'] = lines[i+1]
+            # elif 'Test Type' in lines[i]:
+            #     custData['Test_Type'] = lines[i][10:]
+            # elif 'Partner Name' in lines[i]:
+            #     custData['Partner_Name']= lines[i][13:]        
+            # elif 'Partner Study ID' in lines[i]:
+            #     custData['Partner_Study'] = lines[i][17:]
+            # elif 'FMI Study ID' in lines[i]:
+            #     custData['FMI_Study_ID'] = lines[i][13:]  
+            elif 'Report Date:' in lines[i]:
+                custData['Date'] = lines[i+4]
+            # elif 'Site ID' in lines[i]:
+            #     custData['Site_ID'] = lines[i][8:]
+            elif 'Age-Sex-DOB:' in lines[i]:
+                custData['Date_of_Birth'] = lines[i][18:]   
+            # elif 'Diagnosis:' in lines[i]:
+            #     # print('Dentro')
+            #     if 'Diagnosis' not in custData:
+            #         custData['Diagnosis'] = lines[i][12:]
+                    # print(custData['Diagnosis'])
+            # elif 'Specimen ID:' in lines[i]:
+            #     if 'Specimen_ID' not in custData:
+            #         custData['Specimen_ID'] = lines[i][13:]
+            # elif 'Primary Tumor Site:' in lines[i]:
+            #     if 'Sample_type' not in custData:
+            #         custData['Sample_type'] = lines[i][20:]
+            # elif 'Specimen Site:' in lines[i]:
+            #     if 'Site' not in custData:
+            #         custData['Site'] = lines[i][15:]
+            elif 'Procedure Date:' in lines[i]:
+                if 'Collection_Date' not in custData:
+                    custData['Collection_Date'] = lines[i+4]
+            # elif 'Received Date' in lines[i]:
+            #     custData['Received_Date'] = lines[i][14:]
+            # elif 'Sex:' in lines[i]:
+            #     if 'Sex' not in custData:
+            #         custData['Sex'] = lines[i][4:]
+            # elif 'Visit Type' in lines[i]:
+            #     custData['Visit_Type'] = lines[i][11:]
+            # elif 'Unfortunately, we were not able' in lines[i]:
+            #     custData['Sample Failure']='Yes'
+
+            elif 'RESULTS' in lines[i]:
+                while 'Fusion Mutation: NOT DETECTED' not in lines[i]:
+                    i+=1
+                
+                if 'Fusion Mutation: NOT DETECTED' in lines[i]:
+                    custData['Sample Failure']='Yes'
+
+
+    elif 'NGS Expanded Solid Tumor Panel' in lines:
+        print('PathGroups Not Detected')
+        for i in range(len(lines)):
+            print(lines[i])
+            if 'ACCESSION #:' in lines[i]:
+                if 'FMI_Test' not in custData:
+                    custData['FMI_Test'] = lines[i][13:]
+                    custData['Subjet'] = lines[i][13:]
+                    custData['Test_Type'] = 'No info'
+                    custData['Partner_Name']= 'No info'
+                    custData['Partner_Study'] = 'No info'
+                    custData['FMI_Study_ID'] ='No info'
+                    custData['Received_Date'] = 'No info'
+                    custData['Visit_Type'] = 'No info'
+                    custData['Diagnosis'] = 'No info'
+                    custData['Specimen_ID'] = 'No info'
+                    custData['Sample_type'] = 'No info'
+                    custData['Site'] = 'No info'
+                    custData['Sex'] = 'No info'
+            # elif 'Subject ID' in lines[i]:
+            #     if 'Subjet' not in custData:
+            #         custData['Subjet'] = lines[i+1]
+            # elif 'Test Type' in lines[i]:
+            #     custData['Test_Type'] = lines[i][10:]
+            # elif 'Partner Name' in lines[i]:
+            #     custData['Partner_Name']= lines[i][13:]        
+            # elif 'Partner Study ID' in lines[i]:
+            #     custData['Partner_Study'] = lines[i][17:]
+            # elif 'FMI Study ID' in lines[i]:
+            #     custData['FMI_Study_ID'] = lines[i][13:]  
+            elif 'Report Date:' in lines[i]:
+                custData['Date'] = lines[i+4]
+            # elif 'Site ID' in lines[i]:
+            #     custData['Site_ID'] = lines[i][8:]
+            elif 'Age-Sex-DOB:' in lines[i]:
+                custData['Date_of_Birth'] = lines[i][18:]   
+            # elif 'Diagnosis:' in lines[i]:
+            #     # print('Dentro')
+            #     if 'Diagnosis' not in custData:
+            #         custData['Diagnosis'] = lines[i][12:]
+                    # print(custData['Diagnosis'])
+            # elif 'Specimen ID:' in lines[i]:
+            #     if 'Specimen_ID' not in custData:
+            #         custData['Specimen_ID'] = lines[i][13:]
+            # elif 'Primary Tumor Site:' in lines[i]:
+            #     if 'Sample_type' not in custData:
+            #         custData['Sample_type'] = lines[i][20:]
+            # elif 'Specimen Site:' in lines[i]:
+            #     if 'Site' not in custData:
+            #         custData['Site'] = lines[i][15:]
+            elif 'Procedure Date:' in lines[i]:
+                if 'Collection_Date' not in custData:
+                    custData['Collection_Date'] = lines[i+4]
+            # elif 'Received Date' in lines[i]:
+            #     custData['Received_Date'] = lines[i][14:]
+            # elif 'Sex:' in lines[i]:
+            #     if 'Sex' not in custData:
+            #         custData['Sex'] = lines[i][4:]
+            # elif 'Visit Type' in lines[i]:
+            #     custData['Visit_Type'] = lines[i][11:]
+            # elif 'Unfortunately, we were not able' in lines[i]:
+            #     custData['Sample Failure']='Yes'
+        return custData
+    
+    
+    elif 'Endeavor' in lines:
+        pass
+    else:
+        print('Error in PathGroup files ',pdf )
 
 def fundation_one_generator(dicts_fundation_one, pdfs): 
     """
@@ -2327,7 +2542,7 @@ def fundation_one_generator(dicts_fundation_one, pdfs):
     #Elements of foundation: 
     information_main_list=[]
     
-    foundation_one=['File','TypeOftest','Study Related','Sample Failure','FMI_Test', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis',"ABL1","ACVR1B","AKT1","AKT2","AKT3","ALK","ALOX12B","AMER1","APC","AR","ARAF","ARFRP1","ARID1A","ASXL1","ATM","ATR","ATRX","AURKA","AURKB","AXIN1","AXL","BAP1","BARD1","BCL2","BCL2L1","BCL2L2","BCL6","BCOR","BCORL1","BRAF","BRCA1","BRCA2","BRD4","BRIP1","BTG1","BTG2","BTK","C11orf30","CALR","CARD11","CASP8","CBFB","CBL","CCND1","CCND2","CCND3","CCNE1","CD22","CD274","CD70","CD79A","CD79B","CDC73","CDH1","CDK12","CDK4","CDK6","CDK8","CDKN1A","CDKN1B","CDKN2A","CDKN2B","CDKN2C","CEBPA","CHEK1","CHEK2","CIC","CREBBP","CRKL","CSF1R","CSF3R","CTCF","CTNNA1","CTNNB1","CUL3","CUL4A","CXCR4","CYP17A1","DAXX","DDR1","DDR2","DIS3","DNMT3A","DOT1L","EED","EGFR","EP300","EPHA3","EPHB1","EPHB4","ERBB2","ERBB3","ERBB4","ERCC4","ERG","ERRFI1","ESR1","EZH2","FAM46C","FANCA","FANCC","FANCG","FANCL","FAS","FBXW7","FGF10","FGF12","FGF14","FGF19","FGF23","FGF3","FGF4","FGF6","FGFR1","FGFR2","FGFR3","FGFR4","FH","FLCN","FLT1","FLT3","FOXL2","FUBP1","GABRA6","GATA3","GATA4","GATA6","GID4","GNA11","GNA13","GNAQ","GNAS","GRM3","GSK3B","H3F3A","HDAC1","HGF","HNF1A","HRAS","HSD3B1","ID3","IDH1","IDH2","IGF1R","IKBKE","IKZF1","INPP4B","IRF2","IRF4","IRS2","JAK1","JAK2","JAK3","JUN","KDM5A","KDM5C","KDM6A","KDR","KEAP1","KEL","KIT","KLHL6","KMT2A","KMT2D","KRAS","LTK","LYN","MAF","MAP2K1","MAP2K2","MAP2K4","MAP3K1","MAP3K13","MAPK1","MCL1","MDM2","MDM4","MED12","MEF2B","MEN1","MERTK","MET","MITF","MKNK1","MLH1","MPL","MRE11A","MSH2","MSH3","MSH6","MST1R","MTAP","MTOR","MUTYH","MYC","MYCL","MYCN","MYD88","NBN","NF1","NF2","NFE2L2","NFKBIA","NKX2-1","NOTCH1","NOTCH2","NOTCH3","NPM1","NRAS","NT5C2","NTRK1","NTRK2","NTRK3","P2RY8","PALB2","PARK2","PARP1","PARP2","PARP3","PAX5","PBRM1","PDCD1","PDCD1LG2","PDGFRA","PDGFRB","PDK1","PIK3C2B","PIK3C2G","PIK3CA","PIK3CB","PIK3R1","PIM1","PMS2","POLD1","POLE","PPARG","PPP2R1A","PPP2R2A","PRDM1","PRKAR1A","PRKCI","PTCH1","PTEN","PTPN11","PTPRO","QKI","RAC1","RAD21","RAD51","RAD51B","RAD51C","RAD51D","RAD52","RAD54L","RAF1","RARA","RB1","RBM10","REL","RET","RICTOR","RNF43","ROS1","RPTOR","SDHA","SDHB","SDHC","SDHD","SETD2","SF3B1","SGK1","SMAD2","SMAD4","SMARCA4","SMARCB1","SMO","SNCAIP","SOCS1","SOX2","SOX9","SPEN","SPOP","SRC","STAG2","STAT3","STK11","SUFU","SYK","TBX3","TEK","TET2","TGFBR2","TIPARP","TNFAIP3","TNFRSF14","TP53","TSC1","TSC2","TYRO3","U2AF1","VEGFA","VHL","WHSC1","WHSC1L1","WT1","XPO1","XRCC2","ZNF217","ZNF703","BCR","CD74","ETV4","ETV5","ETV6","EWSR1","EZR","MYB","NUTM1","RSPO2","SDC4","SLC34A2","TERC","TERT","TMPRSS2","C17orf39","EMSY","FAM123B","MLL","MLL2","MSI","MYCL1","TMB","ETV1","GLI1","GPR124","LRP1B","CDH5","TP53BP1","CHUK","PTPRD","ZNRF3","FANCI","MKNK2","NSD1","SMARCD1","SOX10","STAT4","TOE1","TRRAP","IL7R","SH2B3","CRLF2","GEN1","MLL3","PAK3","TOP2A","ARID1B","FANCD2","RUNX1T1","SLIT2","ABL2","APCDD1","ARID2","BACH1","BCL2A1","BLM","BMPR1A","CDH2","CDH20","CHD2","CHD4","CRBN","CUL4B","CYLD","DICER1","EPHA5","EPHA6","EPHA7","EPHB6","FAM175A","FANCE","FANCF","FANCM","FAT1","FAT3","FGF7","FLT4","FOXP1","FRS2","GALNT12","GATA1","GATA2","GREM1","GRIN2A","HLA-A","HLA-B","HLA-C","HOXB13","HSP90AA1","IGF1","IGF2","IGF2R","INHBA","INSR","KAT6A","KMT2C","LMO1","LRP6","LZTR1","MAGI2","NCOR1","NOTCH4","NUDT1","NUP93","PAK7","PARP4","PHLPP2","PIK3C3","PIK3CG","PIK3R2","PLCG2","PNRC1","PREX2","PRKDC","PRSS1","PRSS8","PTCH2","RAD50","RANBP2","RPA1","RUNX1","SMAD3","SPTA1","TAF1","TNF","TNKS","TNKS2","TOP1","TSHR","WISP3","XRCC3","ZBTB2","Loss of Heterozygosity score","Tumor Mutational Burden Score","Tumor Mutational Burden","Microsatellite Instability"]
+    foundation_one=['File','TypeOftest','Study Related','Sample Failure','Sex','FMI_Test', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis',"ABL1","ACVR1B","AKT1","AKT2","AKT3","ALK","ALOX12B","AMER1","APC","AR","ARAF","ARFRP1","ARID1A","ASXL1","ATM","ATR","ATRX","AURKA","AURKB","AXIN1","AXL","BAP1","BARD1","BCL2","BCL2L1","BCL2L2","BCL6","BCOR","BCORL1","BRAF","BRCA1","BRCA2","BRD4","BRIP1","BTG1","BTG2","BTK","C11orf30","CALR","CARD11","CASP8","CBFB","CBL","CCND1","CCND2","CCND3","CCNE1","CD22","CD274","CD70","CD79A","CD79B","CDC73","CDH1","CDK12","CDK4","CDK6","CDK8","CDKN1A","CDKN1B","CDKN2A","CDKN2B","CDKN2C","CEBPA","CHEK1","CHEK2","CIC","CREBBP","CRKL","CSF1R","CSF3R","CTCF","CTNNA1","CTNNB1","CUL3","CUL4A","CXCR4","CYP17A1","DAXX","DDR1","DDR2","DIS3","DNMT3A","DOT1L","EED","EGFR","EP300","EPHA3","EPHB1","EPHB4","ERBB2","ERBB3","ERBB4","ERCC4","ERG","ERRFI1","ESR1","EZH2","FAM46C","FANCA","FANCC","FANCG","FANCL","FAS","FBXW7","FGF10","FGF12","FGF14","FGF19","FGF23","FGF3","FGF4","FGF6","FGFR1","FGFR2","FGFR3","FGFR4","FH","FLCN","FLT1","FLT3","FOXL2","FUBP1","GABRA6","GATA3","GATA4","GATA6","GID4","GNA11","GNA13","GNAQ","GNAS","GRM3","GSK3B","H3F3A","HDAC1","HGF","HNF1A","HRAS","HSD3B1","ID3","IDH1","IDH2","IGF1R","IKBKE","IKZF1","INPP4B","IRF2","IRF4","IRS2","JAK1","JAK2","JAK3","JUN","KDM5A","KDM5C","KDM6A","KDR","KEAP1","KEL","KIT","KLHL6","KMT2A","KMT2D","KRAS","LTK","LYN","MAF","MAP2K1","MAP2K2","MAP2K4","MAP3K1","MAP3K13","MAPK1","MCL1","MDM2","MDM4","MED12","MEF2B","MEN1","MERTK","MET","MITF","MKNK1","MLH1","MPL","MRE11A","MSH2","MSH3","MSH6","MST1R","MTAP","MTOR","MUTYH","MYC","MYCL","MYCN","MYD88","NBN","NF1","NF2","NFE2L2","NFKBIA","NKX2-1","NOTCH1","NOTCH2","NOTCH3","NPM1","NRAS","NT5C2","NTRK1","NTRK2","NTRK3","P2RY8","PALB2","PARK2","PARP1","PARP2","PARP3","PAX5","PBRM1","PDCD1","PDCD1LG2","PDGFRA","PDGFRB","PDK1","PIK3C2B","PIK3C2G","PIK3CA","PIK3CB","PIK3R1","PIM1","PMS2","POLD1","POLE","PPARG","PPP2R1A","PPP2R2A","PRDM1","PRKAR1A","PRKCI","PTCH1","PTEN","PTPN11","PTPRO","QKI","RAC1","RAD21","RAD51","RAD51B","RAD51C","RAD51D","RAD52","RAD54L","RAF1","RARA","RB1","RBM10","REL","RET","RICTOR","RNF43","ROS1","RPTOR","SDHA","SDHB","SDHC","SDHD","SETD2","SF3B1","SGK1","SMAD2","SMAD4","SMARCA4","SMARCB1","SMO","SNCAIP","SOCS1","SOX2","SOX9","SPEN","SPOP","SRC","STAG2","STAT3","STK11","SUFU","SYK","TBX3","TEK","TET2","TGFBR2","TIPARP","TNFAIP3","TNFRSF14","TP53","TSC1","TSC2","TYRO3","U2AF1","VEGFA","VHL","WHSC1","WHSC1L1","WT1","XPO1","XRCC2","ZNF217","ZNF703","BCR","CD74","ETV4","ETV5","ETV6","EWSR1","EZR","MYB","NUTM1","RSPO2","SDC4","SLC34A2","TERC","TERT","TMPRSS2","C17orf39","EMSY","FAM123B","MLL","MLL2","MSI","MYCL1","TMB","ETV1","GLI1","GPR124","LRP1B","CDH5","TP53BP1","CHUK","PTPRD","ZNRF3","FANCI","MKNK2","NSD1","SMARCD1","SOX10","STAT4","TOE1","TRRAP","IL7R","SH2B3","CRLF2","GEN1","MLL3","PAK3","TOP2A","ARID1B","FANCD2","RUNX1T1","SLIT2","ABL2","APCDD1","ARID2","BACH1","BCL2A1","BLM","BMPR1A","CDH2","CDH20","CHD2","CHD4","CRBN","CUL4B","CYLD","DICER1","EPHA5","EPHA6","EPHA7","EPHB6","FAM175A","FANCE","FANCF","FANCM","FAT1","FAT3","FGF7","FLT4","FOXP1","FRS2","GALNT12","GATA1","GATA2","GREM1","GRIN2A","HLA-A","HLA-B","HLA-C","HOXB13","HSP90AA1","IGF1","IGF2","IGF2R","INHBA","INSR","KAT6A","KMT2C","LMO1","LRP6","LZTR1","MAGI2","NCOR1","NOTCH4","NUDT1","NUP93","PAK7","PARP4","PHLPP2","PIK3C3","PIK3CG","PIK3R2","PLCG2","PNRC1","PREX2","PRKDC","PRSS1","PRSS8","PTCH2","RAD50","RANBP2","RPA1","RUNX1","SMAD3","SPTA1","TAF1","TNF","TNKS","TNKS2","TOP1","TSHR","WISP3","XRCC3","ZBTB2","Loss of Heterozygosity score","Tumor Mutational Burden Score","Tumor Mutational Burden","Microsatellite Instability"]
     
     CTA_SOLID=["ABL1","ACVR1B","AKT1","AKT2","AKT3","ALK","ALOX12B","AMER1","APC","AR","ARAF","ARFRP1","ARID1A","ASXL1","ATM","ATR","ATRX","AURKA","AURKB","AXIN1","AXL","BAP1","BARD1","BCL2","BCL2L1","BCL2L2","BCL6","BCOR","BCORL1","BRAF","BRCA1","BRCA2","BRD4","BRIP1","BTG1","BTG2","BTK","C11orf30","CALR","CARD11","CASP8","CBFB","CBL","CCND1","CCND2","CCND3","CCNE1","CD22","CD274","CD70","CD79A","CD79B","CDC73","CDH1","CDK12","CDK4","CDK6","CDK8","CDKN1A","CDKN1B","CDKN2A","CDKN2B","CDKN2C","CEBPA","CHEK1","CHEK2","CIC","CREBBP","CRKL","CSF1R","CSF3R","CTCF","CTNNA1","CTNNB1","CUL3","CUL4A","CXCR4","CYP17A1","DAXX","DDR1","DDR2","DIS3","DNMT3A","DOT1L","EED","EGFR","EP300","EPHA3","EPHB1","EPHB4","ERBB2","ERBB3","ERBB4","ERCC4","ERG","ERRFI1","ESR1","EZH2","FAM46C","FANCA","FANCC","FANCG","FANCL","FAS","FBXW7","FGF10","FGF12","FGF14","FGF19","FGF23","FGF3","FGF4","FGF6","FGFR1","FGFR2","FGFR3","FGFR4","FH","FLCN","FLT1","FLT3","FOXL2","FUBP1","GABRA6","GATA3","GATA4","GATA6","GID4","GNA11","GNA13","GNAQ","GNAS","GRM3","GSK3B","H3F3A","HDAC1","HGF","HNF1A","HRAS","HSD3B1","ID3","IDH1","IDH2","IGF1R","IKBKE","IKZF1","INPP4B","IRF2","IRF4","IRS2","JAK1","JAK2","JAK3","JUN","KDM5A","KDM5C","KDM6A","KDR","KEAP1","KEL","KIT","KLHL6","KMT2A","KMT2D","KRAS","LTK","LYN","MAF","MAP2K1","MAP2K2","MAP2K4","MAP3K1","MAP3K13","MAPK1","MCL1","MDM2","MDM4","MED12","MEF2B","MEN1","MERTK","MET","MITF","MKNK1","MLH1","MPL","MRE11A","MSH2","MSH3","MSH6","MST1R","MTAP","MTOR","MUTYH","MYC","MYCL","MYCN","MYD88","NBN","NF1","NF2","NFE2L2","NFKBIA","NKX2-1","NOTCH1","NOTCH2","NOTCH3","NPM1","NRAS","NT5C2","NTRK1","NTRK2","NTRK3","P2RY8","PALB2","PARK2","PARP1","PARP2","PARP3","PAX5","PBRM1","PDCD1","PDCD1LG2","PDGFRA","PDGFRB","PDK1","PIK3C2B","PIK3C2G","PIK3CA","PIK3CB","PIK3R1","PIM1","PMS2","POLD1","POLE","PPARG","PPP2R1A","PPP2R2A","PRDM1","PRKAR1A","PRKCI","PTCH1","PTEN","PTPN11","PTPRO","QKI","RAC1","RAD21","RAD51","RAD51B","RAD51C","RAD51D","RAD52","RAD54L","RAF1","RARA","RB1","RBM10","REL","RET","RICTOR","RNF43","ROS1","RPTOR","SDHA","SDHB","SDHC","SDHD","SETD2","SF3B1","SGK1","SMAD2","SMAD4","SMARCA4","SMARCB1","SMO","SNCAIP","SOCS1","SOX2","SOX9","SPEN","SPOP","SRC","STAG2","STAT3","STK11","SUFU","SYK","TBX3","TEK","TET2","TGFBR2","TIPARP","TNFAIP3","TNFRSF14","TP53","TSC1","TSC2","TYRO3","U2AF1","VEGFA","VHL","WHSC1","WHSC1L1","WT1","XPO1","XRCC2","ZNF217","ZNF703","BCR","CD74","ETV4","ETV5","ETV6","EWSR1","EZR","MYB","NUTM1","RSPO2","SDC4","SLC34A2","TERC","TERT","TMPRSS2","Loss of Heterozygosity score","Tumor Mutational Burden Score","Tumor Mutational Burden","Microsatellite Instability"]
     
@@ -2350,11 +2565,10 @@ def fundation_one_generator(dicts_fundation_one, pdfs):
     
     # We check what type of file we have. 
     for d in dicts_fundation_one:
-        #print(d) 
+        # print(d) 
         if d is None:
             print("El archivo: "+pdfs[numberOfPDF]+" no cumple el formato")
             numberOfPDF+=1
-
             pass
         else:
             numberOfPDF+=1
@@ -2438,7 +2652,7 @@ def fundation_one_generator(dicts_fundation_one, pdfs):
 
             #Testing Sample Failure:
             if d['Sample Failure']=='Yes':
-                for i in foundation_one[16::]:
+                for i in foundation_one[17::]:
                     d[i]="-"   
             
             df = df.append(d, ignore_index=True)
