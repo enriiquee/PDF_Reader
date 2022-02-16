@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
         custData=detectData(string,type_of_Partner,pdf,Type_of_pdf)
         #print(custData['Date_of_Birth'])
-        # dicts_fundation_one.append(custData)
+        dicts_fundation_one.append(custData)
         # print("NOMBRE DEL PDF: "+ pdf +"\n"+string)
         # custData=detectData(string,type_of_Partner,pdf)
         
@@ -58,4 +58,4 @@ if __name__ == '__main__':
 
 # Detect what type of chip we have: 
 
-    # fundation_one_generator(dicts_fundation_one, pdfs)
+    fundation_one_generator(dicts_fundation_one, pdfs)

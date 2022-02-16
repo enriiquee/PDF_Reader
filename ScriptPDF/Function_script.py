@@ -88,8 +88,7 @@ def detect_type_of_file(string, pdf):
         type_of_file='Invitae'
         return type_of_file  
 
-    elif 'PathGroup Oncology' in string or 'Endeavor' in string or 'NGS Expanded Solid Tumor Panel' in string:
-        print('Entro')
+    elif 'PathGroup Oncology' in string or 'Endeavor' in string or 'NGS Expanded Solid Tumor Panel' in string or 'Endeavor' in string:
         type_of_file='PathGroup'  
         return type_of_file  
     else:
@@ -180,8 +179,15 @@ def detect_Type_of_pdf(string, pdf):
     elif 'INVITAE DIAGNOSTIC TESTING RESULTS' in lines:
         TypeOftest='Invitae'   
 
-    elif 'PATIENT: MERUS':
+    elif 'PATIENT: MERUS' in lines:
         TypeOftest='Merus'     
+    
+    elif 'PathGroup Oncology' in lines or 'NGS Expanded Solid Tumor Panel' in lines or 'Endeavor' in lines:
+        TypeOftest='PathGroups'
+
+    elif 'There is insufficient tumor for sequencing studies.' in lines or 'e N R G y   C L I N I C A L   T R I A L   F U S I O N   A N A L Y S I S' in lines or 'Results with Therapy Associations' in lines:
+        TypeOftest='Caris'
+    
     if TypeOftest=="":
         TypeOftest="***Error in: ***"+pdf
         
@@ -1889,7 +1895,9 @@ def detectData_Janssen(string, pdf, type_of_test):
         # print(custData)
         return custData
     else:
+        custData['Failed_Reading']='Failed'
         print("Detected a type on Janssen that we don't know it.")
+        return custData
 
 def detectData_Invitae(string,pdf,type_of_test):
     """
@@ -2064,9 +2072,13 @@ def detectData_Invitae(string,pdf,type_of_test):
             # print(custData)
             return custData    
         else:
+            custData['Failed_Reading']='Failed'
             print('Invitae Diagnostic Results Error in: ', pdf)
+            return custData
     else:
+        custData['Failed_Reading']='Failed'
         print('Invitae files incorrect formart ', pdf)
+        return custData
 
 def detectData_Caris(string,pdf,type_of_test):
     """
@@ -2374,7 +2386,9 @@ def detectData_Caris(string,pdf,type_of_test):
                     custData['Sex'] = lines[i][4:]        
         return custData
     else:
+        custData['Failed_Reading']='Failed'
         print('Caris files incorrect formart ', pdf)
+        return custData
 
 def detectData_PathGroup(string,pdf,type_of_test):
     """
@@ -2392,84 +2406,81 @@ def detectData_PathGroup(string,pdf,type_of_test):
     unknown_signatures, alts_unknown = [], []
     custData['File']=pdf    
     custData['TypeOftest']='PathGroup'
-    
+    first_iter=True
+
     if 'PathGroup Oncology' in lines:
-        print('PathGroups Not Detected')
-        for i in range(len(lines)):
-            if 'Accession #:' in lines[i]:
-                if 'FMI_Test' not in custData:
-                    custData['FMI_Test'] = lines[i][13:]
-                    custData['Subjet'] = lines[i][13:]
-                    custData['Test_Type'] = 'No info'
-                    custData['Partner_Name']= 'No info'
-                    custData['Partner_Study'] = 'No info'
-                    custData['FMI_Study_ID'] ='No info'
-                    custData['Received_Date'] = 'No info'
-                    custData['Visit_Type'] = 'No info'
-                    custData['Diagnosis'] = 'No info'
-                    custData['Specimen_ID'] = 'No info'
-                    custData['Sample_type'] = 'No info'
-                    custData['Site'] = 'No info'
-                    custData['Sex'] = 'No info'
-            # elif 'Subject ID' in lines[i]:
-            #     if 'Subjet' not in custData:
-            #         custData['Subjet'] = lines[i+1]
-            # elif 'Test Type' in lines[i]:
-            #     custData['Test_Type'] = lines[i][10:]
-            # elif 'Partner Name' in lines[i]:
-            #     custData['Partner_Name']= lines[i][13:]        
-            # elif 'Partner Study ID' in lines[i]:
-            #     custData['Partner_Study'] = lines[i][17:]
-            # elif 'FMI Study ID' in lines[i]:
-            #     custData['FMI_Study_ID'] = lines[i][13:]  
-            elif 'Report Date:' in lines[i]:
-                custData['Date'] = lines[i+4]
-            # elif 'Site ID' in lines[i]:
-            #     custData['Site_ID'] = lines[i][8:]
-            elif 'Age-Sex-DOB:' in lines[i]:
-                custData['Date_of_Birth'] = lines[i][18:]   
-            # elif 'Diagnosis:' in lines[i]:
-            #     # print('Dentro')
-            #     if 'Diagnosis' not in custData:
-            #         custData['Diagnosis'] = lines[i][12:]
-                    # print(custData['Diagnosis'])
-            # elif 'Specimen ID:' in lines[i]:
-            #     if 'Specimen_ID' not in custData:
-            #         custData['Specimen_ID'] = lines[i][13:]
-            # elif 'Primary Tumor Site:' in lines[i]:
-            #     if 'Sample_type' not in custData:
-            #         custData['Sample_type'] = lines[i][20:]
-            # elif 'Specimen Site:' in lines[i]:
-            #     if 'Site' not in custData:
-            #         custData['Site'] = lines[i][15:]
-            elif 'Procedure Date:' in lines[i]:
-                if 'Collection_Date' not in custData:
-                    custData['Collection_Date'] = lines[i+4]
-            # elif 'Received Date' in lines[i]:
-            #     custData['Received_Date'] = lines[i][14:]
-            # elif 'Sex:' in lines[i]:
-            #     if 'Sex' not in custData:
-            #         custData['Sex'] = lines[i][4:]
-            # elif 'Visit Type' in lines[i]:
-            #     custData['Visit_Type'] = lines[i][11:]
-            # elif 'Unfortunately, we were not able' in lines[i]:
-            #     custData['Sample Failure']='Yes'
-
-            elif 'RESULTS' in lines[i]:
-                while 'Fusion Mutation: NOT DETECTED' not in lines[i]:
-                    i+=1
-                
-                if 'Fusion Mutation: NOT DETECTED' in lines[i]:
-                    custData['Sample Failure']='Yes'
-
+        # print(lines)
+        if 'Fusion Mutation: NOT DETECTED' in lines or 'Fusion Mutation: No Result. See Below.' in lines:
+            print('PathGroups Results: Not Detected Mutation')
+            for i in range(len(lines)):
+                if 'Accession #:' in lines[i]:
+                    if 'FMI_Test' not in custData:
+                        custData['FMI_Test'] = lines[i][13:]
+                        custData['Subjet'] = lines[i][13:]
+                        custData['Test_Type'] = 'No info'
+                        custData['Partner_Name']= 'No info'
+                        custData['Partner_Study'] = 'No info'
+                        custData['FMI_Study_ID'] ='No info'
+                        custData['Received_Date'] = 'No info'
+                        custData['Visit_Type'] = 'No info'
+                        custData['Diagnosis'] = 'No info'
+                        custData['Specimen_ID'] = 'No info'
+                        custData['Sample_type'] = 'No info'
+                        custData['Site'] = 'No info'
+                        custData['Sex'] = 'No info'
+                        custData['Sample Failure']='Yes'
+                # elif 'Subject ID' in lines[i]:
+                #     if 'Subjet' not in custData:
+                #         custData['Subjet'] = lines[i+1]
+                # elif 'Test Type' in lines[i]:
+                #     custData['Test_Type'] = lines[i][10:]
+                # elif 'Partner Name' in lines[i]:
+                #     custData['Partner_Name']= lines[i][13:]        
+                # elif 'Partner Study ID' in lines[i]:
+                #     custData['Partner_Study'] = lines[i][17:]
+                # elif 'FMI Study ID' in lines[i]:
+                #     custData['FMI_Study_ID'] = lines[i][13:]  
+                elif 'Report Date:' in lines[i]:
+                    custData['Date'] = lines[i+4]
+                # elif 'Site ID' in lines[i]:
+                #     custData['Site_ID'] = lines[i][8:]
+                elif 'Age-Sex-DOB:' in lines[i]:
+                    custData['Date_of_Birth'] = lines[i][18:]   
+                # elif 'Diagnosis:' in lines[i]:
+                #     # print('Dentro')
+                #     if 'Diagnosis' not in custData:
+                #         custData['Diagnosis'] = lines[i][12:]
+                        # print(custData['Diagnosis'])
+                # elif 'Specimen ID:' in lines[i]:
+                #     if 'Specimen_ID' not in custData:
+                #         custData['Specimen_ID'] = lines[i][13:]
+                # elif 'Primary Tumor Site:' in lines[i]:
+                #     if 'Sample_type' not in custData:
+                #         custData['Sample_type'] = lines[i][20:]
+                # elif 'Specimen Site:' in lines[i]:
+                #     if 'Site' not in custData:
+                #         custData['Site'] = lines[i][15:]
+                elif 'Procedure Date:' in lines[i]:
+                    if 'Collection_Date' not in custData:
+                        custData['Collection_Date'] = lines[i+4]
+                # elif 'Received Date' in lines[i]:
+                #     custData['Received_Date'] = lines[i][14:]
+                # elif 'Sex:' in lines[i]:
+                #     if 'Sex' not in custData:
+                #         custData['Sex'] = lines[i][4:]
+                # elif 'Visit Type' in lines[i]:
+                #     custData['Visit_Type'] = lines[i][11:]
+                # elif 'Unfortunately, we were not able' in lines[i]:
+                #     custData['Sample Failure']='Yes'
+            return custData
 
     elif 'NGS Expanded Solid Tumor Panel' in lines:
-        print('PathGroups Not Detected')
+        print('PathGroups Detected')
         for i in range(len(lines)):
-            print(lines[i])
+            # print(lines[i])
             if 'ACCESSION #:' in lines[i]:
                 if 'FMI_Test' not in custData:
-                    custData['FMI_Test'] = lines[i][13:]
+                    custData['FMI_Test'] = lines[i+2]
                     custData['Subjet'] = lines[i][13:]
                     custData['Test_Type'] = 'No info'
                     custData['Partner_Name']= 'No info'
@@ -2481,7 +2492,6 @@ def detectData_PathGroup(string,pdf,type_of_test):
                     custData['Specimen_ID'] = 'No info'
                     custData['Sample_type'] = 'No info'
                     custData['Site'] = 'No info'
-                    custData['Sex'] = 'No info'
             # elif 'Subject ID' in lines[i]:
             #     if 'Subjet' not in custData:
             #         custData['Subjet'] = lines[i+1]
@@ -2493,12 +2503,17 @@ def detectData_PathGroup(string,pdf,type_of_test):
             #     custData['Partner_Study'] = lines[i][17:]
             # elif 'FMI Study ID' in lines[i]:
             #     custData['FMI_Study_ID'] = lines[i][13:]  
-            elif 'Report Date:' in lines[i]:
-                custData['Date'] = lines[i+4]
+            elif 'Report Date' in lines[i]:
+                if 'Date' not in custData:
+                    custData['Date'] = lines[i-1]
             # elif 'Site ID' in lines[i]:
             #     custData['Site_ID'] = lines[i][8:]
             elif 'Age-Sex-DOB:' in lines[i]:
-                custData['Date_of_Birth'] = lines[i][18:]   
+                custData['Date_of_Birth'] = lines[i][21:] 
+                if 'F' in lines[i]:
+                    custData['Sex']='Female'
+                else:
+                    custData['Sex']='Male'
             # elif 'Diagnosis:' in lines[i]:
             #     # print('Dentro')
             #     if 'Diagnosis' not in custData:
@@ -2515,7 +2530,7 @@ def detectData_PathGroup(string,pdf,type_of_test):
             #         custData['Site'] = lines[i][15:]
             elif 'Procedure Date:' in lines[i]:
                 if 'Collection_Date' not in custData:
-                    custData['Collection_Date'] = lines[i+4]
+                    custData['Collection_Date'] = lines[i][16:]
             # elif 'Received Date' in lines[i]:
             #     custData['Received_Date'] = lines[i][14:]
             # elif 'Sex:' in lines[i]:
@@ -2525,11 +2540,75 @@ def detectData_PathGroup(string,pdf,type_of_test):
             #     custData['Visit_Type'] = lines[i][11:]
             # elif 'Unfortunately, we were not able' in lines[i]:
             #     custData['Sample Failure']='Yes'
+            elif 'were DETECTED' in lines[i] and first_iter:
+                first_iter=False
+                while lines[i]!='TECHNICAL DETAILS':
+                    #print(lines[i])
+                    i+=1
+                try:
+                    i+=1
+                    while "Variant" not in lines[i]: 
+                        if lines[i]=='Gene':
+                            i+=1
+                        else:
+                            genenomic_findings.append(lines[i])
+                            i+=1
+
+                    if "Variant" in lines[i]:
+                        j=0
+                        i+=1
+                        #print(lines[i])
+                        while j<len(genenomic_findings):
+                            alts_findings.append(lines[i])
+                            j+=1
+                            i+=1
+                except:
+                    print("Error in Genomic Findings " + pdf)
+        # print(genenomic_findings, alts_findings)
+        for gene in genenomic_findings:
+            custData[gene] = "" #initialize a blank string to add to
+        for gene, alt in zip(genenomic_findings, alts_findings):
+            custData[gene] = custData[gene] + ";" + alt
+            custData[gene] = custData[gene].strip(";")
+
+        # print(custData)
         return custData
     
     
     elif 'Endeavor' in lines:
-        pass
+        print('PathGroups Endeavor Detected')
+        for i in range(len(lines)):
+            # print(lines[i])
+            if 'Accession#' in lines[i]:
+                if 'FMI_Test' not in custData:
+                    custData['FMI_Test'] = lines[i+5]
+                    # custData['Subjet'] = lines[i][13:]
+                    custData['Test_Type'] = 'PathGroup Endeavor'
+                    custData['Partner_Name']= 'PathGroup'
+                    custData['Partner_Study'] = 'No info'
+                    custData['FMI_Study_ID'] ='No info'
+                    custData['Visit_Type'] = 'No info'
+                    custData['Diagnosis'] = 'No info'
+                    custData['Specimen_ID'] = 'No info'
+                    custData['Sample_type'] = 'No info'
+                    custData['Site'] = 'No info'
+            elif 'Received' in lines[i]:
+                custData['Received_Date'] = lines[i-1]
+            
+            elif 'Reported' in lines[i]:
+                if 'Date' not in custData:
+                    custData['Date'] = lines[i-1]
+            elif 'Sex' in lines[i]:
+                custData['Date_of_Birth'] = lines[i+5] 
+                if 'F' in lines[i]:
+                    custData['Sex']='Female'
+                else:
+                    custData['Sex']='Male'
+            elif 'Collected' in lines[i]:
+                if 'Collection_Date' not in custData:
+                    custData['Collection_Date'] = lines[i+1]
+   
+        return custData
     else:
         print('Error in PathGroup files ',pdf )
 
@@ -2542,7 +2621,7 @@ def fundation_one_generator(dicts_fundation_one, pdfs):
     #Elements of foundation: 
     information_main_list=[]
     
-    foundation_one=['File','TypeOftest','Study Related','Sample Failure','Sex','FMI_Test', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis',"ABL1","ACVR1B","AKT1","AKT2","AKT3","ALK","ALOX12B","AMER1","APC","AR","ARAF","ARFRP1","ARID1A","ASXL1","ATM","ATR","ATRX","AURKA","AURKB","AXIN1","AXL","BAP1","BARD1","BCL2","BCL2L1","BCL2L2","BCL6","BCOR","BCORL1","BRAF","BRCA1","BRCA2","BRD4","BRIP1","BTG1","BTG2","BTK","C11orf30","CALR","CARD11","CASP8","CBFB","CBL","CCND1","CCND2","CCND3","CCNE1","CD22","CD274","CD70","CD79A","CD79B","CDC73","CDH1","CDK12","CDK4","CDK6","CDK8","CDKN1A","CDKN1B","CDKN2A","CDKN2B","CDKN2C","CEBPA","CHEK1","CHEK2","CIC","CREBBP","CRKL","CSF1R","CSF3R","CTCF","CTNNA1","CTNNB1","CUL3","CUL4A","CXCR4","CYP17A1","DAXX","DDR1","DDR2","DIS3","DNMT3A","DOT1L","EED","EGFR","EP300","EPHA3","EPHB1","EPHB4","ERBB2","ERBB3","ERBB4","ERCC4","ERG","ERRFI1","ESR1","EZH2","FAM46C","FANCA","FANCC","FANCG","FANCL","FAS","FBXW7","FGF10","FGF12","FGF14","FGF19","FGF23","FGF3","FGF4","FGF6","FGFR1","FGFR2","FGFR3","FGFR4","FH","FLCN","FLT1","FLT3","FOXL2","FUBP1","GABRA6","GATA3","GATA4","GATA6","GID4","GNA11","GNA13","GNAQ","GNAS","GRM3","GSK3B","H3F3A","HDAC1","HGF","HNF1A","HRAS","HSD3B1","ID3","IDH1","IDH2","IGF1R","IKBKE","IKZF1","INPP4B","IRF2","IRF4","IRS2","JAK1","JAK2","JAK3","JUN","KDM5A","KDM5C","KDM6A","KDR","KEAP1","KEL","KIT","KLHL6","KMT2A","KMT2D","KRAS","LTK","LYN","MAF","MAP2K1","MAP2K2","MAP2K4","MAP3K1","MAP3K13","MAPK1","MCL1","MDM2","MDM4","MED12","MEF2B","MEN1","MERTK","MET","MITF","MKNK1","MLH1","MPL","MRE11A","MSH2","MSH3","MSH6","MST1R","MTAP","MTOR","MUTYH","MYC","MYCL","MYCN","MYD88","NBN","NF1","NF2","NFE2L2","NFKBIA","NKX2-1","NOTCH1","NOTCH2","NOTCH3","NPM1","NRAS","NT5C2","NTRK1","NTRK2","NTRK3","P2RY8","PALB2","PARK2","PARP1","PARP2","PARP3","PAX5","PBRM1","PDCD1","PDCD1LG2","PDGFRA","PDGFRB","PDK1","PIK3C2B","PIK3C2G","PIK3CA","PIK3CB","PIK3R1","PIM1","PMS2","POLD1","POLE","PPARG","PPP2R1A","PPP2R2A","PRDM1","PRKAR1A","PRKCI","PTCH1","PTEN","PTPN11","PTPRO","QKI","RAC1","RAD21","RAD51","RAD51B","RAD51C","RAD51D","RAD52","RAD54L","RAF1","RARA","RB1","RBM10","REL","RET","RICTOR","RNF43","ROS1","RPTOR","SDHA","SDHB","SDHC","SDHD","SETD2","SF3B1","SGK1","SMAD2","SMAD4","SMARCA4","SMARCB1","SMO","SNCAIP","SOCS1","SOX2","SOX9","SPEN","SPOP","SRC","STAG2","STAT3","STK11","SUFU","SYK","TBX3","TEK","TET2","TGFBR2","TIPARP","TNFAIP3","TNFRSF14","TP53","TSC1","TSC2","TYRO3","U2AF1","VEGFA","VHL","WHSC1","WHSC1L1","WT1","XPO1","XRCC2","ZNF217","ZNF703","BCR","CD74","ETV4","ETV5","ETV6","EWSR1","EZR","MYB","NUTM1","RSPO2","SDC4","SLC34A2","TERC","TERT","TMPRSS2","C17orf39","EMSY","FAM123B","MLL","MLL2","MSI","MYCL1","TMB","ETV1","GLI1","GPR124","LRP1B","CDH5","TP53BP1","CHUK","PTPRD","ZNRF3","FANCI","MKNK2","NSD1","SMARCD1","SOX10","STAT4","TOE1","TRRAP","IL7R","SH2B3","CRLF2","GEN1","MLL3","PAK3","TOP2A","ARID1B","FANCD2","RUNX1T1","SLIT2","ABL2","APCDD1","ARID2","BACH1","BCL2A1","BLM","BMPR1A","CDH2","CDH20","CHD2","CHD4","CRBN","CUL4B","CYLD","DICER1","EPHA5","EPHA6","EPHA7","EPHB6","FAM175A","FANCE","FANCF","FANCM","FAT1","FAT3","FGF7","FLT4","FOXP1","FRS2","GALNT12","GATA1","GATA2","GREM1","GRIN2A","HLA-A","HLA-B","HLA-C","HOXB13","HSP90AA1","IGF1","IGF2","IGF2R","INHBA","INSR","KAT6A","KMT2C","LMO1","LRP6","LZTR1","MAGI2","NCOR1","NOTCH4","NUDT1","NUP93","PAK7","PARP4","PHLPP2","PIK3C3","PIK3CG","PIK3R2","PLCG2","PNRC1","PREX2","PRKDC","PRSS1","PRSS8","PTCH2","RAD50","RANBP2","RPA1","RUNX1","SMAD3","SPTA1","TAF1","TNF","TNKS","TNKS2","TOP1","TSHR","WISP3","XRCC3","ZBTB2","Loss of Heterozygosity score","Tumor Mutational Burden Score","Tumor Mutational Burden","Microsatellite Instability"]
+    foundation_one=['File','Failed_Reading','TypeOftest','Study Related','Sample Failure','Sex','FMI_Test', 'Date', 'Test_Type', 'Sample_type', 'Site', 'Collection_Date', 'Received_Date', 'Visit_Type', 'Partner_Name', 'FMI_Study_ID', 'Date_of_Birth', 'Diagnosis',"ABL1","ACVR1B","AKT1","AKT2","AKT3","ALK","ALOX12B","AMER1","APC","AR","ARAF","ARFRP1","ARID1A","ASXL1","ATM","ATR","ATRX","AURKA","AURKB","AXIN1","AXL","BAP1","BARD1","BCL2","BCL2L1","BCL2L2","BCL6","BCOR","BCORL1","BRAF","BRCA1","BRCA2","BRD4","BRIP1","BTG1","BTG2","BTK","C11orf30","CALR","CARD11","CASP8","CBFB","CBL","CCND1","CCND2","CCND3","CCNE1","CD22","CD274","CD70","CD79A","CD79B","CDC73","CDH1","CDK12","CDK4","CDK6","CDK8","CDKN1A","CDKN1B","CDKN2A","CDKN2B","CDKN2C","CEBPA","CHEK1","CHEK2","CIC","CREBBP","CRKL","CSF1R","CSF3R","CTCF","CTNNA1","CTNNB1","CUL3","CUL4A","CXCR4","CYP17A1","DAXX","DDR1","DDR2","DIS3","DNMT3A","DOT1L","EED","EGFR","EP300","EPHA3","EPHB1","EPHB4","ERBB2","ERBB3","ERBB4","ERCC4","ERG","ERRFI1","ESR1","EZH2","FAM46C","FANCA","FANCC","FANCG","FANCL","FAS","FBXW7","FGF10","FGF12","FGF14","FGF19","FGF23","FGF3","FGF4","FGF6","FGFR1","FGFR2","FGFR3","FGFR4","FH","FLCN","FLT1","FLT3","FOXL2","FUBP1","GABRA6","GATA3","GATA4","GATA6","GID4","GNA11","GNA13","GNAQ","GNAS","GRM3","GSK3B","H3F3A","HDAC1","HGF","HNF1A","HRAS","HSD3B1","ID3","IDH1","IDH2","IGF1R","IKBKE","IKZF1","INPP4B","IRF2","IRF4","IRS2","JAK1","JAK2","JAK3","JUN","KDM5A","KDM5C","KDM6A","KDR","KEAP1","KEL","KIT","KLHL6","KMT2A","KMT2D","KRAS","LTK","LYN","MAF","MAP2K1","MAP2K2","MAP2K4","MAP3K1","MAP3K13","MAPK1","MCL1","MDM2","MDM4","MED12","MEF2B","MEN1","MERTK","MET","MITF","MKNK1","MLH1","MPL","MRE11A","MSH2","MSH3","MSH6","MST1R","MTAP","MTOR","MUTYH","MYC","MYCL","MYCN","MYD88","NBN","NF1","NF2","NFE2L2","NFKBIA","NKX2-1","NOTCH1","NOTCH2","NOTCH3","NPM1","NRAS","NT5C2","NTRK1","NTRK2","NTRK3","P2RY8","PALB2","PARK2","PARP1","PARP2","PARP3","PAX5","PBRM1","PDCD1","PDCD1LG2","PDGFRA","PDGFRB","PDK1","PIK3C2B","PIK3C2G","PIK3CA","PIK3CB","PIK3R1","PIM1","PMS2","POLD1","POLE","PPARG","PPP2R1A","PPP2R2A","PRDM1","PRKAR1A","PRKCI","PTCH1","PTEN","PTPN11","PTPRO","QKI","RAC1","RAD21","RAD51","RAD51B","RAD51C","RAD51D","RAD52","RAD54L","RAF1","RARA","RB1","RBM10","REL","RET","RICTOR","RNF43","ROS1","RPTOR","SDHA","SDHB","SDHC","SDHD","SETD2","SF3B1","SGK1","SMAD2","SMAD4","SMARCA4","SMARCB1","SMO","SNCAIP","SOCS1","SOX2","SOX9","SPEN","SPOP","SRC","STAG2","STAT3","STK11","SUFU","SYK","TBX3","TEK","TET2","TGFBR2","TIPARP","TNFAIP3","TNFRSF14","TP53","TSC1","TSC2","TYRO3","U2AF1","VEGFA","VHL","WHSC1","WHSC1L1","WT1","XPO1","XRCC2","ZNF217","ZNF703","BCR","CD74","ETV4","ETV5","ETV6","EWSR1","EZR","MYB","NUTM1","RSPO2","SDC4","SLC34A2","TERC","TERT","TMPRSS2","C17orf39","EMSY","FAM123B","MLL","MLL2","MSI","MYCL1","TMB","ETV1","GLI1","GPR124","LRP1B","CDH5","TP53BP1","CHUK","PTPRD","ZNRF3","FANCI","MKNK2","NSD1","SMARCD1","SOX10","STAT4","TOE1","TRRAP","IL7R","SH2B3","CRLF2","GEN1","MLL3","PAK3","TOP2A","ARID1B","FANCD2","RUNX1T1","SLIT2","ABL2","APCDD1","ARID2","BACH1","BCL2A1","BLM","BMPR1A","CDH2","CDH20","CHD2","CHD4","CRBN","CUL4B","CYLD","DICER1","EPHA5","EPHA6","EPHA7","EPHB6","FAM175A","FANCE","FANCF","FANCM","FAT1","FAT3","FGF7","FLT4","FOXP1","FRS2","GALNT12","GATA1","GATA2","GREM1","GRIN2A","HLA-A","HLA-B","HLA-C","HOXB13","HSP90AA1","IGF1","IGF2","IGF2R","INHBA","INSR","KAT6A","KMT2C","LMO1","LRP6","LZTR1","MAGI2","NCOR1","NOTCH4","NUDT1","NUP93","PAK7","PARP4","PHLPP2","PIK3C3","PIK3CG","PIK3R2","PLCG2","PNRC1","PREX2","PRKDC","PRSS1","PRSS8","PTCH2","RAD50","RANBP2","RPA1","RUNX1","SMAD3","SPTA1","TAF1","TNF","TNKS","TNKS2","TOP1","TSHR","WISP3","XRCC3","ZBTB2","Loss of Heterozygosity score","Tumor Mutational Burden Score","Tumor Mutational Burden","Microsatellite Instability"]
     
     CTA_SOLID=["ABL1","ACVR1B","AKT1","AKT2","AKT3","ALK","ALOX12B","AMER1","APC","AR","ARAF","ARFRP1","ARID1A","ASXL1","ATM","ATR","ATRX","AURKA","AURKB","AXIN1","AXL","BAP1","BARD1","BCL2","BCL2L1","BCL2L2","BCL6","BCOR","BCORL1","BRAF","BRCA1","BRCA2","BRD4","BRIP1","BTG1","BTG2","BTK","C11orf30","CALR","CARD11","CASP8","CBFB","CBL","CCND1","CCND2","CCND3","CCNE1","CD22","CD274","CD70","CD79A","CD79B","CDC73","CDH1","CDK12","CDK4","CDK6","CDK8","CDKN1A","CDKN1B","CDKN2A","CDKN2B","CDKN2C","CEBPA","CHEK1","CHEK2","CIC","CREBBP","CRKL","CSF1R","CSF3R","CTCF","CTNNA1","CTNNB1","CUL3","CUL4A","CXCR4","CYP17A1","DAXX","DDR1","DDR2","DIS3","DNMT3A","DOT1L","EED","EGFR","EP300","EPHA3","EPHB1","EPHB4","ERBB2","ERBB3","ERBB4","ERCC4","ERG","ERRFI1","ESR1","EZH2","FAM46C","FANCA","FANCC","FANCG","FANCL","FAS","FBXW7","FGF10","FGF12","FGF14","FGF19","FGF23","FGF3","FGF4","FGF6","FGFR1","FGFR2","FGFR3","FGFR4","FH","FLCN","FLT1","FLT3","FOXL2","FUBP1","GABRA6","GATA3","GATA4","GATA6","GID4","GNA11","GNA13","GNAQ","GNAS","GRM3","GSK3B","H3F3A","HDAC1","HGF","HNF1A","HRAS","HSD3B1","ID3","IDH1","IDH2","IGF1R","IKBKE","IKZF1","INPP4B","IRF2","IRF4","IRS2","JAK1","JAK2","JAK3","JUN","KDM5A","KDM5C","KDM6A","KDR","KEAP1","KEL","KIT","KLHL6","KMT2A","KMT2D","KRAS","LTK","LYN","MAF","MAP2K1","MAP2K2","MAP2K4","MAP3K1","MAP3K13","MAPK1","MCL1","MDM2","MDM4","MED12","MEF2B","MEN1","MERTK","MET","MITF","MKNK1","MLH1","MPL","MRE11A","MSH2","MSH3","MSH6","MST1R","MTAP","MTOR","MUTYH","MYC","MYCL","MYCN","MYD88","NBN","NF1","NF2","NFE2L2","NFKBIA","NKX2-1","NOTCH1","NOTCH2","NOTCH3","NPM1","NRAS","NT5C2","NTRK1","NTRK2","NTRK3","P2RY8","PALB2","PARK2","PARP1","PARP2","PARP3","PAX5","PBRM1","PDCD1","PDCD1LG2","PDGFRA","PDGFRB","PDK1","PIK3C2B","PIK3C2G","PIK3CA","PIK3CB","PIK3R1","PIM1","PMS2","POLD1","POLE","PPARG","PPP2R1A","PPP2R2A","PRDM1","PRKAR1A","PRKCI","PTCH1","PTEN","PTPN11","PTPRO","QKI","RAC1","RAD21","RAD51","RAD51B","RAD51C","RAD51D","RAD52","RAD54L","RAF1","RARA","RB1","RBM10","REL","RET","RICTOR","RNF43","ROS1","RPTOR","SDHA","SDHB","SDHC","SDHD","SETD2","SF3B1","SGK1","SMAD2","SMAD4","SMARCA4","SMARCB1","SMO","SNCAIP","SOCS1","SOX2","SOX9","SPEN","SPOP","SRC","STAG2","STAT3","STK11","SUFU","SYK","TBX3","TEK","TET2","TGFBR2","TIPARP","TNFAIP3","TNFRSF14","TP53","TSC1","TSC2","TYRO3","U2AF1","VEGFA","VHL","WHSC1","WHSC1L1","WT1","XPO1","XRCC2","ZNF217","ZNF703","BCR","CD74","ETV4","ETV5","ETV6","EWSR1","EZR","MYB","NUTM1","RSPO2","SDC4","SLC34A2","TERC","TERT","TMPRSS2","Loss of Heterozygosity score","Tumor Mutational Burden Score","Tumor Mutational Burden","Microsatellite Instability"]
     
@@ -2558,6 +2637,8 @@ def fundation_one_generator(dicts_fundation_one, pdfs):
     
     T7_315_18=["ABL1","ARAF","AURKB","BCORL1","CARD11","CDC73","CDKN2C","CSF1R","DOT1L","ERG","FANCG","FGF4","FLT4","GATA6","GSK3B","IGF2","JAK2","KIT","MAGI2","MEN1","MYC","NOTCH2","PALB2","PIK3CB","PREX2","RAD50","ROS1","SLIT2","SOX2","SUFU","TOP1","WT1","ALK","ETV5","NTRK1","ABL2","ARFRP1","AXIN1","BLM","CBFB","CDH1","CEBPA","CTCF","EGFR","ERRFI1","FANCL","FGF6","FOXL2","GID4","H3F3A","IKBKE","JAK3","KLHL6","MAP2K1","MET","MYCL","NOTCH3","PARK2","PIK3CG","PRKAR1A","RAD51","RPTOR","SMAD2","SOX9","SYK","TOP2A","XPO1","BCL2","ETV6","NTRK2","ACVR1B","ARID1A","AXL","BRAF","CBL","CDK12","CHD2","CTNNA1","EP300","ESR1","FAS","FGFR1","FOXP1","HGF","IKZF1","JUN","KMT2A","MAP2K2","MITF","NPM1","PAX5","PIK3R1","PRKCI","RAF1","RUNX1","SMAD3","SPEN","TAF1","TET2","TP53","ZBTB2","BCR","PDGFRA","AKT1","ARID1B","BAP1","BRCA1","CCND1","CDK4","CHD4","CTNNB1","EPHA3","EZH2","FAT1","FGFR2","FRS2","GLI1","HNF1A","IL7R","KAT6A","MAP2K4","MLH1","MYCN","NRAS","PBRM1","PIK3R2","PRKDC","RANBP2","RUNX1T1","SMAD4","SPOP","TBX3","TGFBR2","TSC1","ZNF217","AKT2","ARID2","BARD1","BRCA2","CCND2","CDK6","CHEK1","CUL3","EPHA5","FAM46C","FBXW7","FGFR3","FUBP1","GNA11","HRAS","INHBA","KMT2C","MAP3K1","MPL","MYD88","NSD1","PDCD1LG2","PLCG2","PRSS8","RARA","SDHA","SMARCA4","SPTA1","TERC","TNFAIP3","TSC2","ZNF703","AKT3","ASXL1","BRD4","CCND3","CDK8","CHEK2","CYLD","EPHA7","FANCA","FGF10","FGFR4","GABRA6","GNA13","HSD3B1","INPP4B","KDM5A","MCL1","MRE11A","NF1","PMS2","PTCH1","RB1","SDHB","SMARCB1","SRC","TERT","TNFRSF14","TSHR","RET","ATM","BCL2L1","BRIP1","CCNE1","CDKN1A","CIC","DAXX","EPHB1","FANCC","FGF14","FH","GATA1","GNAQ","HSP90AA1","IRF2","KDM5C","KMT2D","MDM2","MSH2","NF2","PDGFRB","POLD1","PTEN","RBM10","SDHC","SMO","STAG2","U2AF1","AMER1","ATR","BCL2L2","BTG1","CD274","CDKN1B","CREBBP","DDR2","ERBB2","FANCD2","FGF19","FLCN","GATA2","GNAS","IDH1","IRF4","KDM6A","MDM4","MSH6","NFE2L2","NTRK3","PDK1","POLE","PTPN11","SDHD","SNCAIP","STAT3","VEGFA","MYB","TMPRSS2","ATRX","BCL6","BTK","CD79A","CDKN2A","CRKL","DICER1","ERBB3","FANCE","FGF23","FLT1","GATA3","GPR124","IDH2","IRS2","KDR","KRAS","MED12","MTOR","NFKBIA","NUP93","PIK3C2B","PPP2R1A","QKI","RICTOR","SETD2","SOCS1","STAT4","VHL","ETV1","APC","AURKA","BCOR","C11orf30","CD79B","CDKN2B","CRLF2","DNMT3A","ERBB4","FANCF","FGF3","FLT3","GATA4","GRIN2A","IGF1R","JAK1","KEAP1","LMO1","MEF2B","MUTYH","NKX2-1","PAK3","PIK3CA","PRDM1","RAC1","RNF43","SF3B1","SOX10","STK11","WISP3","ETV4","AR","GRM3","KEL","LRP1B","NOTCH1","LYN","LZTR1"]
     
+    PathGroups=["ABL1","AKT2","ALK","AR","ARID1A","ATM","AURKA","B2M","BCL6","BCORL1","BRAF","BRCA2","CALR","CBL","CBLC","CCND3","CD79B","CDK4","CDKN2A","CHEK2","CRLF2","CSF3R","CUX1","DDR2","DNMT3A","EIF1AX","ERBB2","ESR1","EZH2","FGFR1","FGFR3","FLT3","GATA1","GATA3","GNAQ","H3F3A","HRAS","IDH1","IKZF1","JAK1","JAK3","KDR","KMT2A","KRAS","MAP2K2","MEF2B","MLH1","MYC","NDUFA13","NF2","NOTCH2","NRAS","NTRK2","PALB2","PDGFRA","PIK3CA","PIM1","PLCG2","PRPF40B","PTEN","RAD21","RB1","RHOA","RUNX1","SETD2","SF3B1","SMAD4","SMC1A","SMO","SRSF2","STAT3","STK11","SYK","TET2","TNFAIP3","TRAF3","TSC2","U2AF1","VHL","XPO1"]
+
     numberOfPDF=0
     df = pd.DataFrame(data=None, columns=foundation_one, dtype=None, copy=False)
 
@@ -2598,6 +2679,10 @@ def fundation_one_generator(dicts_fundation_one, pdfs):
                         d[key]=0
             elif d['TypeOftest']=='T7_315_28':
                 for key in T7_315_18:
+                    if key not in d:
+                        d[key]=0
+            elif d['TypeOftest']=='PathGroup':
+                for key in PathGroups:
                     if key not in d:
                         d[key]=0
 
@@ -2648,7 +2733,7 @@ def fundation_one_generator(dicts_fundation_one, pdfs):
             # addd not analyzed to dicctionaries that doesn't have.
             for i in foundation_one[15::]:
                 if i not in d:
-                    d[i]='--'
+                    d[i]='N/A'
 
             #Testing Sample Failure:
             if d['Sample Failure']=='Yes':
