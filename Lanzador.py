@@ -68,7 +68,11 @@ def tkinter_GUI():
             value_progress_increasse=(len(pdfs)/2)*100
             logger.info('Reading files...')
             for pdf in pdfs:
-                string = convert_pdf_to_txt(pdf)
+                try:
+                    string = convert_pdf_to_txt(pdf)
+                except:
+                    print ("I/O error in: ", pdf)
+                    continue
                 #print(string)
                 #print("NOMBRE DEL PDF: "+ pdf +"\n"+string)
                 my_progressbar['value']+=value_progress_increasse

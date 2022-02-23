@@ -34,7 +34,11 @@ if __name__ == '__main__':
     dicts_clovis=[]
     dicts_Unknown=[] 
     for pdf in pdfs:
-        string = convert_pdf_to_txt(pdf)
+        try:
+            string = convert_pdf_to_txt(pdf)
+        except:
+            print ("I/O error in: ", pdf)
+        continue
         # print(string)
         Type_of_pdf=detect_Type_of_pdf(string, pdf)
         type_of_Partner=detect_type_of_file(string, pdf)
