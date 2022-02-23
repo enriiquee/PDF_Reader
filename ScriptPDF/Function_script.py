@@ -19,29 +19,24 @@ def convert_pdf_to_txt(path):
     :input: path of the files
     :return: lines of the pdf
     """
-    try:
-        rsrcmgr = PDFResourceManager()
-        retstr = StringIO()
-        laparams = LAParams()
-        device = TextConverter(rsrcmgr, retstr, laparams=laparams)
-        fp = open(path, 'rb')
-        interpreter = PDFPageInterpreter(rsrcmgr, device)
-        password = ""
-        maxpages = 0
-        caching = True
-        pagenos=set()
-        for page in PDFPage.get_pages(fp, pagenos, maxpages=maxpages, password=password,caching=caching, check_extractable=True):
-            interpreter.process_page(page)
-        fp.close()
-        device.close()
-        str = retstr.getvalue()
-        retstr.close()
+    rsrcmgr = PDFResourceManager()
+    retstr = StringIO()
+    laparams = LAParams()
+    device = TextConverter(rsrcmgr, retstr, laparams=laparams)
+    fp = open(path, 'rb')
+    interpreter = PDFPageInterpreter(rsrcmgr, device)
+    password = ""
+    maxpages = 0
+    caching = True
+    pagenos=set()
+    for page in PDFPage.get_pages(fp, pagenos, maxpages=maxpages, password=password,caching=caching, check_extractable=True):
+        interpreter.process_page(page)
+    fp.close()
+    device.close()
+    str = retstr.getvalue()
+    retstr.close()
 
-        return str.replace("\\n","\n")
-    except:
-        print "I/O error({0}): {1}".format(e.errno, e.strerror)
-        continue
-
+    return str.replace("\\n","\n")
 
 def detect_type_of_file(string, pdf):
     """
@@ -2640,7 +2635,7 @@ def detectData_Genentech(string, pdf, type_of_test):
     custData['TypeOftest']=type_of_test
     for i in range(len(lines)):
         # print(lines[i])
-        if 'FMI Test Order' in lines[i] or 'FMI Study ID' in lines[i]:
+        if 'FMI Test Order' in lines[i] or 'FMI Study ID' in lines:
             if 'FMI_Test' not in custData:
                 custData['FMI_Test'] = lines[i+1]
                 custData['Failed_Reading']='No'
