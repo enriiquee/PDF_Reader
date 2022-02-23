@@ -60,8 +60,8 @@ def tkinter_GUI():
             #Create a list with the pdf files. 
             pdfs = []
             for file in glob2.glob("**/*.pdf"):
-                pdfs.append(file)
-                
+                if file.endswith('.pdf'):
+                    pdfs.append(file)
             
             #Create a list where we are going to save our dictionaries generated. 
             dicts_fundation_one=[]
