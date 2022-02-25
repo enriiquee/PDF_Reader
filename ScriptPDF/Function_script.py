@@ -1,10 +1,12 @@
 import xlsxwriter, glob, os
 import pandas as pd
+import shutil
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.converter import TextConverter
 from pdfminer.layout import LAParams
 from pdfminer.pdfpage import PDFPage
 from six import StringIO
+
 
 """
 This script contains the functions that we are going to use to perform the different tasks (Convert pdf to text, detect the type of file we have, detect the type of data and the functions that correspond to each type of 
@@ -44,6 +46,7 @@ def detect_type_of_file(string, pdf):
     We check that the files contain the Partner Name, as they exist of Clovis, Pfizer and Roche
     """
     type_of_file=""
+    dst="./Error_files/"
     # print(string)
     if 'Partner Name' in string or 'PARTNER NAME' in string: 
         lines = list(filter(None,string.split('\n')))
@@ -71,6 +74,9 @@ def detect_type_of_file(string, pdf):
                     return type_of_file
                 else:
                     type_of_file='No cumple formato'
+                    if not os.path.exists('Error_files/Uknown'):
+                        os.makedirs('Error_files/Uknown')
+                    shutil.copy(pdf, './Error_files/Uknown')
                     print("Hay un archivo que no cumple este formato "+pdf)
                     return type_of_file
     
@@ -94,28 +100,11 @@ def detect_type_of_file(string, pdf):
         type_of_file='PathGroup'  
         return type_of_file  
     else:
-         print('No contiene información sobre el Partner. ' + 'Nombre del archivo: '+ pdf )
-        # Eliminamos las tabulaciones. 
-        # lines = list(filter(None,string.split('\n')))
+        if not os.path.exists('Error_files/Uknown'):
+            os.makedirs('Error_files/Uknown')
+        shutil.copy(pdf, './Error_files/Uknown')
+        print('No contiene información sobre el Partner. ' + 'Nombre del archivo: '+ pdf )
 
-        # if 'Test Type' in string: #Comprobamos si existe el test type en el archivo.
-        #     lines = list(filter(None,string.split('\n')))
-        #     for i in range(len(lines)):
-        #         if 'Test Type' in lines[i]:
-        #             if 'Liquid' in lines[i]:
-        #                 test_type='Liquid'
-        #                 return test_type
-        #             elif 'FoundationOne DX1' in lines[i]:
-        #                 test_type='FoundationOne DX1'
-        #                 return test_type
-        #             elif '(SOLID)' in lines[i]:
-        #                 test_type='Solid'
-        #                 return test_type
-        # else:
-        #     test_type="No_Type"
-        #     return test_type
-        #     print("No tiene tipo de muestra")
-        
 def detectData(string, type_of_partner, pdf,TypeOftest):
     """
     Here we detect what kind of data we have based on Partner Name used previously. 
@@ -1811,7 +1800,7 @@ def detectData_Janssen(string, pdf, type_of_test):
         # print(custData)
         return custData
     
-    elif any("Janssen Study" in s for s in lines):
+    elif any("Janssen Study" or 'Johnson and Johnson' in s for s in lines):
         print("Janssen Study QUALIFIED")
         custData['Test_Type'] = 'Janssen QUALIFIED'
         custData['Partner_Name']= 'Janssen'
@@ -1819,8 +1808,10 @@ def detectData_Janssen(string, pdf, type_of_test):
         custData['Sample_type'] = 'No-info'
         custData['Site'] = 'No-info'
         custData['Received_Date'] = 'No info'
-        custData['Visit_Type'] = 'No info'
+        custData['Visit_Type'] = 'No info' 
+        
         for i in range(len(lines)):
+         
             # print(lines[i])
             if 'FMI ID' in lines[i]:
                 if 'FMI_Test' not in custData:
@@ -1846,8 +1837,9 @@ def detectData_Janssen(string, pdf, type_of_test):
             elif 'Specimen Collection Date' in lines[i]:
                 custData['Collection_Date'] = lines[i][25:]            
             elif 'Unfortunately, we were not able' in lines[i]:
+                custData['Sample Failure']='No'
+            elif 'Unfortunately, we were not able to report data for this specimen due to sample failure.' in lines[i]:
                 custData['Sample Failure']='Yes'
-
             elif "Stratification Information" in lines[i]:
                 #print(lines[i])
                 while lines[i]!='Criteria':
@@ -1904,6 +1896,9 @@ def detectData_Janssen(string, pdf, type_of_test):
         return custData
     else:
         custData['Failed_Reading']='Failed'
+        if not os.path.exists('Error_files/Janssen'):
+                os.makedirs('Error_files/Janssen')
+        shutil.copy(pdf, './Error_files/Janssen')
         print("Detected a type on Janssen that we don't know it.")
         return custData
 
@@ -1919,8 +1914,6 @@ def detectData_Invitae(string,pdf,type_of_test):
     custData = {} #Diccionario donde se van a ir guardando todas las variables
     genes_pot, alts_pot = [], [] 
     genenomic_findings, alts_findings = [], []
-    genomic_signatures, alts_signatures = [], []
-    unknown_signatures, alts_unknown = [], []
     custData['File']=pdf
     custData['TypeOftest']=type_of_test
     first_iter=True
@@ -2081,6 +2074,9 @@ def detectData_Invitae(string,pdf,type_of_test):
             return custData    
         else:
             custData['Failed_Reading']='Failed'
+            if not os.path.exists('Error_files/Invitae'):
+                os.makedirs('Error_files/Invitae')
+            shutil.copy(pdf, './Error_files/Invitae')
             print('Invitae Diagnostic Results Error in: ', pdf)
             return custData
     else:
@@ -2395,6 +2391,10 @@ def detectData_Caris(string,pdf,type_of_test):
         return custData
     else:
         custData['Failed_Reading']='Failed'
+        #Creamos una carpeta en caso de que haya error para guardar el archivo pdf
+        if not os.path.exists('Error_files/Caris'):
+            os.makedirs('Error_files/Caris')
+        shutil.copy(pdf, './Error_files/Caris')
         print('Caris files incorrect formart ', pdf)
         return custData
 
@@ -2407,11 +2407,8 @@ def detectData_PathGroup(string,pdf,type_of_test):
     lines = list(filter(None,string.split('\n')))
    
     custData = {} #Diccionario donde se van a ir guardando todas las variables
-    genes_pot, alts_pot = [], [] 
-    Enrollment_gene, Enrollment_alt=[],[]
     genenomic_findings, alts_findings = [], []
-    genomic_signatures, alts_signatures = [], []
-    unknown_signatures, alts_unknown = [], []
+
     custData['File']=pdf    
     custData['TypeOftest']='PathGroup'
     first_iter=True
@@ -2618,6 +2615,9 @@ def detectData_PathGroup(string,pdf,type_of_test):
    
         return custData
     else:
+        if not os.path.exists('Error_files/PathGroup'):
+            os.makedirs('Error_files/PathGroup')
+        shutil.copy(pdf, './Error_files/PathGroup')
         print('Error in PathGroup files ',pdf )
 
 def detectData_Genentech(string, pdf, type_of_test):

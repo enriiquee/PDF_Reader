@@ -59,6 +59,9 @@ def tkinter_GUI():
             os.chdir(folder)
             #Create a list with the pdf files. 
             pdfs = []
+            if os.path.exists('Error_files'):
+                shutil.rmtree('Error_files')
+                 
             for file in glob2.glob("**/*.pdf"):
                 if file.endswith('.pdf'):
                     pdfs.append(file)
