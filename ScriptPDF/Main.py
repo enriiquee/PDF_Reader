@@ -15,8 +15,8 @@ if __name__ == '__main__':
     #path of folder containing several PDFs
     
     #path = r'/Users/enriq/Dropbox/Lector_adobe/PDF/' 
-    path= r'C:/Users/enriq/OneDrive - UNIVERSIDAD DE MURCIA/PDF_Reader/Archivos/New files'
-    # path= r'C:/Users/eperez2/OneDrive - UNIVERSIDAD DE MURCIA/PDF_Reader/Archivos/New files'
+    
+    path= r'C:/Users/eperez2/OneDrive - UNIVERSIDAD DE MURCIA/PDF_Reader/Archivos/New files'
 
     # path= r'/Users/pax-32/Dropbox/Lector_adobe/PDF/'
     #path = r'/home/eperez/Documents/PDF_Reader/PDF'
