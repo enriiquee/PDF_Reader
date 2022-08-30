@@ -2788,45 +2788,50 @@ def fundation_one_generator(dicts_fundation_one, pdfs):
             pass
         else:
             numberOfPDF+=1
-            if d['TypeOftest']=='CTA_SOLID':
-                for key in CTA_SOLID:
-                    if key not in d:
-                        d[key]=0
-            elif d['TypeOftest']=='DX1':
-                for key in DX1:
-                    if key not in d:
-                        d[key]=0
-            elif d['TypeOftest']=='CF3':
-                for key in CF3:
-                    if key not in d:
-                        d[key]=0
-            elif d['TypeOftest']=='CTA_LIQUID_AB1':
-                for key in CTA_Liquid_AB1:
-                    if key not in d:
-                        d[key]=0
-            elif d['TypeOftest']=='CTA_Liquid':
-                for key in CTA_Liquid:
-                    if key not in d:
-                        d[key]=0
-            elif d['TypeOftest']=='T7_395':
-                for key in T7_395:
-                    if key not in d:
-                        d[key]=0
-            elif d['TypeOftest']=='T7_315_28':
-                for key in T7_315_18:
-                    if key not in d:
-                        d[key]=0
-            elif d['TypeOftest']=='PathGroup':
-                for key in PathGroups:
-                    if key not in d:
-                        d[key]=0
-            elif d['TypeOftest']=='Genentech':
-                for key in Genentech:
-                    if key not in d:
-                        d[key]=0
+            try:
 
-            elif d['TypeOftest'] is None:
-                print('No info about it')
+                if d['TypeOftest']=='CTA_SOLID':
+                    for key in CTA_SOLID:
+                        if key not in d:
+                            d[key]=0
+                elif d['TypeOftest']=='DX1':
+                    for key in DX1:
+                        if key not in d:
+                            d[key]=0
+                elif d['TypeOftest']=='CF3':
+                    for key in CF3:
+                        if key not in d:
+                            d[key]=0
+                elif d['TypeOftest']=='CTA_LIQUID_AB1':
+                    for key in CTA_Liquid_AB1:
+                        if key not in d:
+                            d[key]=0
+                elif d['TypeOftest']=='CTA_Liquid':
+                    for key in CTA_Liquid:
+                        if key not in d:
+                            d[key]=0
+                elif d['TypeOftest']=='T7_395':
+                    for key in T7_395:
+                        if key not in d:
+                            d[key]=0
+                elif d['TypeOftest']=='T7_315_28':
+                    for key in T7_315_18:
+                        if key not in d:
+                            d[key]=0
+                elif d['TypeOftest']=='PathGroup':
+                    for key in PathGroups:
+                        if key not in d:
+                            d[key]=0
+                elif d['TypeOftest']=='Genentech':
+                    for key in Genentech:
+                        if key not in d:
+                            d[key]=0
+
+                elif d['TypeOftest'] is None:
+                    print('No info about it')
+            except:
+                print("Error in PDF: ", pdfs[numberOfPDF])
+                continue  # or you could use 'continue'
             
             #Add No value in Sample Failure: 
             if 'Sample Failure' not in d:
